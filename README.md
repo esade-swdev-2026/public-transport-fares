@@ -1,49 +1,67 @@
-# app
+# Public Transport Fares
 
-> **First thing: rename `app` to your project.** It appears in this file, in
-> `pyproject.toml` (`name`, `[project.scripts]`, `[tool.hatch.build.targets.wheel]`),
-> in the folder `src/app/`, and in the imports under `tests/`. Session 5's lab walks
-> you through it.
+A command-line application that helps passengers calculate public transport fares between stations.
 
-One or two sentences on what your program does and who it is for.
+The project is designed to provide clear fare information based on the journey and passenger type.
 
 ## Install
 
-```
+Install the project and its dependencies with:
+
+```bash
 uv sync
 ```
 
-This creates a virtual environment and installs everything, including the development
-tools, from `uv.lock` — the committed file that pins exact versions so every teammate
-and CI resolve the same ones. When you change a dependency in `pyproject.toml`, run
-`uv lock` and commit the updated `uv.lock`; CI fails if the two disagree.
+This creates a virtual environment and installs the dependencies specified in `pyproject.toml` using the exact versions recorded in `uv.lock`.
 
 ## Run
 
+Show the available commands:
+
+```bash
+uv run fares --help
 ```
-uv run app --help
-uv run app greet World
-uv run app greet World --count 3
+
+Calculate a fare using the default adult passenger type:
+
+```bash
+uv run fares calculate "Sol" "Airport"
 ```
+
+Calculate a fare for a different passenger type:
+
+```bash
+uv run fares calculate "Sol" "Airport" --passenger child
+```
+
+Valid passenger types are:
+
+- `adult`
+- `child`
+- `student`
+- `senior`
 
 ## Develop
 
-```
-uv run ruff check .          # lint
-uv run ruff format .         # format (CI runs `--check` and fails on a diff)
-uv run mypy src tests        # types
-uv run pytest                # tests
+Run the project checks with:
+
+```bash
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src tests
+uv run pytest
 ```
 
-These four commands are exactly what `.github/workflows/check.yml` runs on every push.
-If they pass here, CI passes.
+These checks verify code quality, formatting, type correctness, and automated tests.
 
 ## Layout
 
-```
-src/app/          your package — importable, installable, not just a script
-  cli.py          the typer command-line interface
-  __main__.py     lets `python -m app` work
-tests/            pytest tests, mirroring src/
-pyproject.toml    dependencies and tool configuration — the single source of truth
+```text
+src/public_transport_fares/
+    cli.py          Typer command-line interface
+    __main__.py     allows the package to be run as a Python module
+tests/
+    test_cli.py     automated CLI tests
+pyproject.toml      project configuration and dependencies
+uv.lock             exact dependency versions
 ```

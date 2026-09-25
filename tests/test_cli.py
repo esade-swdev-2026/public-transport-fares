@@ -1,28 +1,34 @@
 from typer.testing import CliRunner
 
-from app.cli import app
+from public_transport_fares.cli import app
 
 runner = CliRunner()
 
 
-def test_greet_says_hello() -> None:
-    result = runner.invoke(app, ["greet", "Ada"])
+def test_calculate_uses_adult_by_default() -> None:
+    result = runner.invoke(app, ["calculate", "Sol", "Airport"])
+
     assert result.exit_code == 0
-    assert "Hello, Ada!" in result.stdout
+    assert "Sol" in result.stdout
+    assert "Airport" in result.stdout
+    assert "adult" in result.stdout
 
 
-def test_greet_repeats_with_count() -> None:
-    result = runner.invoke(app, ["greet", "Ada", "--count", "3"])
+def test_calculate_accepts_passenger_option() -> None:
+    result = runner.invoke(
+        app,
+        ["calculate", "Sol", "Airport", "--passenger", "child"],
+    )
+
     assert result.exit_code == 0
-    assert result.stdout.count("Hello, Ada!") == 3
+    assert "child" in result.stdout
 
 
-def test_greet_rejects_bad_count() -> None:
-    result = runner.invoke(app, ["greet", "Ada", "--count", "0"])
+def test_calculate_rejects_invalid_passenger() -> None:
+    result = runner.invoke(
+        app,
+        ["calculate", "Sol", "Airport", "--passenger", "dog"],
+    )
+
     assert result.exit_code == 1
-
-
-def test_bye_says_goodbye() -> None:
-    result = runner.invoke(app, ["bye", "Ada"])
-    assert result.exit_code == 0
-    assert "Goodbye, Ada." in result.stdout
+    assert "unknown passenger type" in result.stderr
