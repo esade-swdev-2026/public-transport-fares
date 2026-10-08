@@ -65,3 +65,23 @@ tests/
 pyproject.toml      project configuration and dependencies
 uv.lock             exact dependency versions
 ```
+
+
+### Current Assumptions and Limitations
+
+The initial version of Public Transport Fares uses a simplified simulation of Barcelona's fare system.
+
+- The default passenger is an adult, and no passenger discounts are currently applied.
+- Only single-journey tickets are supported.
+- The simulation is limited to metro travel, seven predefined stations, and three fare zones.
+- Each station belongs to exactly one zone.
+- Ticket prices are fixed at €2.50, €3.50, and €4.50 for one, two, and three zones respectively.
+- Fare zones are calculated using the absolute difference between zone numbers plus one.
+- Journeys within the same zone count as one zone, and fares are identical in both directions.
+- Actual routes, distances, stops, transfers, and travel times are not considered.
+- Prices do not change based on time or day.
+- Stations and fares are defined directly in the code.
+- The application does not yet store journeys, calculate monthly spending, or access live transport information.
+- The application runs exclusively through the command line.
+
+These assumptions are intentional simplifications for the first version. Additional functionality will be introduced incrementally through the Product Backlog.
