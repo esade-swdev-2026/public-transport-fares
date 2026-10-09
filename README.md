@@ -25,13 +25,13 @@ uv run fares --help
 Calculate a fare using the default adult passenger type:
 
 ```bash
-uv run fares calculate "Sol" "Airport"
+uv run fares calculate "Catalunya" "Terrassa"
 ```
 
 Calculate a fare for a different passenger type:
 
 ```bash
-uv run fares calculate "Sol" "Airport" --passenger child
+uv run fares calculate "Catalunya" "Terrassa" --passenger child
 ```
 
 Valid passenger types are:
@@ -40,6 +40,30 @@ Valid passenger types are:
 - `child`
 - `student`
 - `senior`
+
+
+### Unknown Station Errors
+
+Station names are case-insensitive, and extra spaces at the beginning or end are ignored.
+
+If a passenger enters an unknown station, the application displays a clear error message.
+
+For example:
+
+```bash
+uv run fares calculate "Madrid" "Terrassa"
+```
+
+Output:
+
+```text
+Error: unknown station 'madrid'. Use 'fares stations' to see valid stations.
+```
+
+The application exits with a non-zero exit code and does not display a Python traceback.
+
+Note: The `fares stations` command is planned for a future version and is not yet implemented.
+
 
 ## Develop
 
