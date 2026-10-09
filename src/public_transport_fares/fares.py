@@ -15,3 +15,8 @@ def calculate_fare(origin_zone: int, destination_zone: int) -> float:
     number_of_zones = abs(destination_zone - origin_zone) + 1
 
     return FARE_PRICES[number_of_zones]
+
+
+def is_valid_passenger_type(passenger: str) -> bool:
+    valid_passenger_types = ["adult", "child", "student", "senior"]
+    return passenger in valid_passenger_types

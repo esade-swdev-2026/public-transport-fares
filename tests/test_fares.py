@@ -1,6 +1,6 @@
 import pytest
 
-from public_transport_fares.fares import calculate_fare
+from public_transport_fares.fares import calculate_fare, is_valid_passenger_type
 
 
 def test_fare_within_same_zone() -> None:
@@ -31,3 +31,19 @@ def test_invalid_origin_zone() -> None:
 def test_invalid_destination_zone() -> None:
     with pytest.raises(ValueError, match="Invalid destination zone"):
         calculate_fare(1, 4)
+
+
+@pytest.mark.parametrize(
+    "passenger",
+    ["adult", "child", "student", "senior"],
+)
+def test_valid_passenger_types(passenger: str) -> None:
+    assert is_valid_passenger_type(passenger)
+
+
+@pytest.mark.parametrize(
+    "passenger",
+    ["dog", "", "unknown"],
+)
+def test_invalid_passenger_types(passenger: str) -> None:
+    assert not is_valid_passenger_type(passenger)

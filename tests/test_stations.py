@@ -26,3 +26,8 @@ def test_station_name_ignores_extra_spaces() -> None:
 def test_unknown_station_raises_error() -> None:
     with pytest.raises(KeyError):
         get_station_zone("Madrid")
+
+
+def test_empty_station_raises_error() -> None:
+    with pytest.raises(KeyError):
+        get_station_zone("")
