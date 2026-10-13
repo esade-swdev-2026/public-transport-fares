@@ -1,7 +1,13 @@
 import typer
 
-from public_transport_fares.fares import calculate_fare, is_valid_passenger_type
+from public_transport_fares.fares import (
+    apply_passenger_discount,
+    calculate_fare,
+    is_valid_passenger_type,
+)
 from public_transport_fares.stations import get_station_zone
+
+app = typer.Typer(help="Calculate public transport fares between stations.")
 
 app = typer.Typer(help="Calculate public transport fares between stations.")
 
@@ -39,7 +45,8 @@ def calculate(
         )
         raise typer.Exit(code=1) from None
 
-    price = calculate_fare(origin_zone, destination_zone)
+    base_price = calculate_fare(origin_zone, destination_zone)
+    price = apply_passenger_discount(base_price, passenger)
 
     typer.echo(f"Fare from {origin} to {destination} for passenger type {passenger}: {price:.2f} €")
 

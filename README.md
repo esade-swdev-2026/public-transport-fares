@@ -41,6 +41,23 @@ Valid passenger types are:
 - `student`
 - `senior`
 
+Each passenger type pays a percentage of the adult fare:
+
+| Passenger type | Discount |
+| --- | --- |
+| `adult` | 0% (default) |
+| `child` | 50% |
+| `student` | 20% |
+| `senior` | 40% |
+
+For example, a child travelling from Catalunya to Terrassa (three zones) pays half of €4.50:
+
+```text
+Fare from Catalunya to Terrassa for passenger type child: 2.25 €
+```
+
+An unknown passenger type, such as `--passenger dog`, prints an error and exits with a non-zero exit code.
+
 
 ### Unknown Station Errors
 
@@ -80,22 +97,23 @@ These checks verify code quality, formatting, type correctness, and automated te
 
 ## Layout
 
-```text
 src/public_transport_fares/
     cli.py          Typer command-line interface
+    fares.py        fare prices, zone calculation and passenger discounts
+    stations.py     stations and their fare zones
     __main__.py     allows the package to be run as a Python module
 tests/
-    test_cli.py     automated CLI tests
+    test_cli.py       automated CLI tests
+    test_fares.py     fare and discount tests
+    test_stations.py  station lookup tests
 pyproject.toml      project configuration and dependencies
 uv.lock             exact dependency versions
-```
-
 
 ### Current Assumptions and Limitations
 
 The initial version of Public Transport Fares uses a simplified simulation of Barcelona's fare system.
 
-- The default passenger is an adult, and no passenger discounts are currently applied.
+- The default passenger is an adult. Child, student and senior passengers receive a fixed percentage discount on the adult fare.
 - Only single-journey tickets are supported.
 - The simulation is limited to metro travel, seven predefined stations, and three fare zones.
 - Each station belongs to exactly one zone.
