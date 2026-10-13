@@ -4,6 +4,14 @@ FARE_PRICES = {
     3: 4.50,
 }
 
+# Discount per passenger type, as agreed by the team for backlog item 3.
+PASSENGER_DISCOUNTS = {
+    "adult": 0.0,
+    "child": 0.5,
+    "student": 0.2,
+    "senior": 0.4,
+}
+
 
 def calculate_fare(origin_zone: int, destination_zone: int) -> float:
     if origin_zone not in FARE_PRICES:
@@ -18,5 +26,11 @@ def calculate_fare(origin_zone: int, destination_zone: int) -> float:
 
 
 def is_valid_passenger_type(passenger: str) -> bool:
-    valid_passenger_types = ["adult", "child", "student", "senior"]
-    return passenger in valid_passenger_types
+    return passenger in PASSENGER_DISCOUNTS
+
+
+def apply_passenger_discount(price: float, passenger: str) -> float:
+    if not is_valid_passenger_type(passenger):
+        raise ValueError("Invalid passenger type: Options: adult, child, student, senior.")
+
+    return price * (1 - PASSENGER_DISCOUNTS[passenger])

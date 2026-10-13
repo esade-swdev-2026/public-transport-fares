@@ -1,6 +1,10 @@
 import pytest
 
-from public_transport_fares.fares import calculate_fare, is_valid_passenger_type
+from public_transport_fares.fares import (
+    apply_passenger_discount,
+    calculate_fare,
+    is_valid_passenger_type,
+)
 
 
 def test_fare_within_same_zone() -> None:
@@ -47,3 +51,23 @@ def test_valid_passenger_types(passenger: str) -> None:
 )
 def test_invalid_passenger_types(passenger: str) -> None:
     assert not is_valid_passenger_type(passenger)
+
+
+@pytest.mark.parametrize(
+    ("passenger", "expected_price"),
+    [
+        ("adult", 4.50),
+        ("child", 2.25),
+        ("student", 3.60),
+        ("senior", 2.70),
+    ],
+)
+def test_passenger_discount_on_three_zone_fare(passenger: str, expected_price: float) -> None:
+    assert apply_passenger_discount(4.50, passenger) == pytest.approx(expected_price)
+
+
+def test_invalid_passenger_discount_raises_error() -> None:
+    with pytest.raises(
+        ValueError, match="Invalid passenger type. Options: adult, child, student, senior."
+    ):
+        apply_passenger_discount(4.50, "dog")
