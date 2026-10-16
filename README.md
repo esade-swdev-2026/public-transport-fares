@@ -34,6 +34,24 @@ Calculate a fare for a different passenger type:
 uv run fares calculate "Catalunya" "Terrassa" --passenger child
 ```
 
+List all stations and their fare zones:
+
+```bash
+uv run fares stations
+```
+
+Output:
+
+```text
+Catalunya            Zone 1
+Sagrada Familia      Zone 1
+Sants Estacio        Zone 1
+Zona Universitaria   Zone 1
+Rubi                 Zone 2
+Sant Cugat           Zone 2
+Terrassa             Zone 3
+```
+
 Valid passenger types are:
 
 - `adult`
@@ -78,8 +96,6 @@ Error: unknown station 'madrid'. Use 'fares stations' to see valid stations.
 ```
 
 The application exits with a non-zero exit code and does not display a Python traceback.
-
-Note: The `fares stations` command is planned for a future version and is not yet implemented.
 
 
 ## Develop

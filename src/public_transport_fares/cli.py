@@ -5,17 +5,9 @@ from public_transport_fares.fares import (
     calculate_fare,
     is_valid_passenger_type,
 )
-from public_transport_fares.stations import get_station_zone
+from public_transport_fares.stations import get_station_zone, list_stations
 
 app = typer.Typer(help="Calculate public transport fares between stations.")
-
-app = typer.Typer(help="Calculate public transport fares between stations.")
-
-
-@app.callback()
-def main() -> None:
-    """Public transport fare calculator."""
-    pass
 
 
 @app.command()
@@ -51,5 +43,9 @@ def calculate(
     typer.echo(f"Fare from {origin} to {destination} for passenger type {passenger}: {price:.2f} €")
 
 
-if __name__ == "__main__":
-    app()
+@app.command()
+def stations() -> None:
+    """List all stations and their fare zones."""
+
+    for station in list_stations():
+        typer.echo(f"{station.name:<20} Zone {station.zone}")
