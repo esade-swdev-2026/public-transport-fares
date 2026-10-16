@@ -3,6 +3,7 @@ import pytest
 from public_transport_fares.fares import (
     apply_passenger_discount,
     calculate_fare,
+    calculate_ticket_price,
     is_valid_passenger_type,
     price_for_zones,
 )
@@ -77,3 +78,11 @@ def test_invalid_passenger_discount_raises_error() -> None:
 def test_price_for_unknown_number_of_zones_raises_error() -> None:
     with pytest.raises(ValueError, match="No fare defined for 4 zones"):
         price_for_zones(4)
+
+
+def test_ten_trip_ticket_price() -> None:
+    assert calculate_ticket_price(2.50, "10-trip") == 20.00
+
+
+def test_monthly_ticket_price() -> None:
+    assert calculate_ticket_price(2.50, "monthly") == 40.00
