@@ -26,6 +26,7 @@ TEN_TRIP_JOURNEYS = 10
 TEN_TRIP_DISCOUNT = 0.20
 MONTHLY_BASE_PRICE = 40.00
 SINGLE_BASE_PRICE = 2.50
+TICKET_TYPES = ("single", "10-trip", "monthly")
 
 
 def price_for_zones(number_of_zones: int) -> float:
@@ -59,10 +60,17 @@ def apply_passenger_discount(price: float, passenger: str) -> float:
 
 
 def calculate_ticket_price(single_price: float, ticket_type: str) -> float:
+    if ticket_type == "single":
+        return single_price
+
     if ticket_type == "10-trip":
         return single_price * TEN_TRIP_JOURNEYS * (1 - TEN_TRIP_DISCOUNT)
 
     if ticket_type == "monthly":
         return MONTHLY_BASE_PRICE * (single_price / SINGLE_BASE_PRICE)
 
-    return single_price
+    raise ValueError("Invalid ticket type. Options: single, 10-trip, monthly.")
+
+
+def is_valid_ticket_type(ticket_type: str) -> bool:
+    return ticket_type in TICKET_TYPES

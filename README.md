@@ -73,11 +73,58 @@ Each passenger type pays a percentage of the adult fare:
 For example, a child travelling from Catalunya to Terrassa (three zones) pays half of €4.50:
 
 ```text
-Fare from Catalunya to Terrassa for passenger type child: 2.25 €
+Fare from Catalunya to Terrassa for passenger type child and ticket type single: 2.25 €
 ```
 
 An unknown passenger type, such as `--passenger dog`, prints an error and exits with a non-zero exit code.
 
+### Ticket Types
+
+Passengers can choose between three ticket types using the `--ticket` option:
+
+| Ticket type | Description |
+|---|---|
+| `single` | One journey (default option) |
+| `10-trip` | Ten journeys with a 20% discount |
+| `monthly` | Monthly pass for the selected fare zones |
+
+The application uses simulated prices based on the number of fare zones:
+
+| Zones | Single | 10-trip | Monthly |
+|---|---|---|---|
+| 1 | €2.50 | €20.00 | €40.00 |
+| 2 | €3.50 | €28.00 | €56.00 |
+| 3 | €4.50 | €36.00 | €72.00 |
+
+**Examples**
+
+Calculate the price of a 10-trip ticket:
+
+```bash
+uv run fares calculate "Catalunya" "Terrassa" --ticket 10-trip
+```
+
+Expected price: €36.00.
+
+Calculate the price of a monthly ticket:
+
+```bash
+uv run fares calculate "Catalunya" "Terrassa" --ticket monthly
+```
+
+Expected price: €72.00.
+
+Apply a student discount to a 10-trip ticket:
+
+```bash
+uv run fares calculate "Catalunya" "Terrassa" --ticket 10-trip --passenger student
+```
+
+Expected price: €28.80.
+
+If `--ticket` is omitted, the application calculates a single ticket by default.
+
+Invalid ticket types display an error message and exit with a non-zero status code. The prices and discounts are simulated for this academic project and do not represent official public transport fares.
 
 ### Unknown Station Errors
 
@@ -113,29 +160,52 @@ uv run pytest
 
 These checks verify code quality, formatting, type correctness, and automated tests.
 
+### Running the Project Checks
+
+To run all project checks from the repository root:
+
+```bash
+./scripts/check.sh
+```
+
+This script checks code quality with Ruff, verifies formatting, checks type annotations with Mypy, and runs the automated tests with Pytest.
+
 ## Layout
 
-src/public_transport_fares/
-    cli.py          Typer command-line interface
-    fares.py        fare prices, zone calculation and passenger discounts
-    stations.py     stations and their fare zones
-    __main__.py     allows the package to be run as a Python module
-tests/
-    test_cli.py       automated CLI tests
-    test_fares.py     fare and discount tests
-    test_stations.py  station lookup tests
-pyproject.toml      project configuration and dependencies
-uv.lock             exact dependency versions
+```text
+public-transport-fares/
+├── src/
+│   └── public_transport_fares/
+│       ├── __main__.py
+│       ├── cli.py
+│       ├── fares.py
+│       └── stations.py
+├── tests/
+│   ├── test_cli.py
+│   ├── test_fares.py
+│   └── test_stations.py
+├── scripts/
+│   └── check.sh
+├── pyproject.toml
+└── uv.lock
+```
+
+- `cli.py`: command-line interface built with Typer.
+- `fares.py`: fare calculations, ticket prices, and passenger discounts.
+- `stations.py`: station information and fare zones.
+- `tests/`: automated tests.
+- `scripts/check.sh`: runs the project quality checks.
 
 ### Current Assumptions and Limitations
 
 The initial version of Public Transport Fares uses a simplified simulation of Barcelona's fare system.
 
 - The default passenger is an adult. Child, student and senior passengers receive a fixed percentage discount on the adult fare.
-- Only single-journey tickets are supported.
+- Three ticket types are supported: single, 10-trip, and monthly.
+- Ticket prices and passenger discounts are simulated and do not represent official Barcelona public transport fares.
 - The simulation is limited to metro travel, seven predefined stations, and three fare zones.
 - Each station belongs to exactly one zone.
-- Ticket prices are fixed at €2.50, €3.50, and €4.50 for one, two, and three zones respectively.
+- Single-ticket prices are €2.50, €3.50, and €4.50 for one, two, and three zones respectively. The prices of 10-trip and monthly tickets are calculated from these base fares.
 - Fare zones are calculated using the absolute difference between zone numbers plus one.
 - Journeys within the same zone count as one zone, and fares are identical in both directions.
 - Actual routes, distances, stops, transfers, and travel times are not considered.

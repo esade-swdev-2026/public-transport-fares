@@ -3,7 +3,9 @@ import typer
 from public_transport_fares.fares import (
     apply_passenger_discount,
     calculate_fare,
+    calculate_ticket_price,
     is_valid_passenger_type,
+    is_valid_ticket_type,
 )
 from public_transport_fares.stations import get_station_zone, list_stations
 
@@ -15,12 +17,20 @@ def calculate(
     origin: str,
     destination: str,
     passenger: str = "adult",
+    ticket: str = "single",
 ) -> None:
     """Calculate the fare between two stations."""
 
     if not is_valid_passenger_type(passenger):
         typer.echo(
             f"Error: unknown passenger type '{passenger}'.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    if not is_valid_ticket_type(ticket):
+        typer.echo(
+            f"Error: Invalid ticket type '{ticket}'. Options: single, 10-trip, monthly.",
             err=True,
         )
         raise typer.Exit(code=1)
@@ -38,9 +48,13 @@ def calculate(
         raise typer.Exit(code=1) from None
 
     base_price = calculate_fare(origin_zone, destination_zone)
-    price = apply_passenger_discount(base_price, passenger)
+    ticket_price = calculate_ticket_price(base_price, ticket)
+    price = apply_passenger_discount(ticket_price, passenger)
 
-    typer.echo(f"Fare from {origin} to {destination} for passenger type {passenger}: {price:.2f} €")
+    typer.echo(
+        f"Fare from {origin} to {destination} for passenger type {passenger} "
+        f"and ticket type {ticket}: {price:.2f} €"
+    )
 
 
 @app.command()
