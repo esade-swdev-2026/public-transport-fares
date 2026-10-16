@@ -27,4 +27,4 @@ def get_station_zone(station_name: str) -> int:
 
 
 def list_stations() -> list[Station]:
-    return sorted(STATIONS, key=lambda station: (station.zone, station.name))
+    return sorted(STATIONS, key=lambda station: station.name)

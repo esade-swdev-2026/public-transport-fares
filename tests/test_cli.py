@@ -58,3 +58,23 @@ def test_stations_lists_every_station_with_its_zone() -> None:
     assert "Sant Cugat" in result.stdout
     assert "Terrassa             Zone 3" in result.stdout
     assert len(result.stdout.strip().splitlines()) == 7
+
+
+def test_stations_are_listed_alphabetically_by_name() -> None:
+    result = runner.invoke(app, ["stations"])
+
+    listed_names = [line.split("Zone")[0].strip() for line in result.stdout.strip().splitlines()]
+
+    assert listed_names == sorted(listed_names)
+
+
+def test_each_listed_station_name_can_be_used_to_calculate_a_fare() -> None:
+    stations_result = runner.invoke(app, ["stations"])
+    listed_names = [
+        line.split("Zone")[0].strip() for line in stations_result.stdout.strip().splitlines()
+    ]
+
+    for name in listed_names:
+        calculate_result = runner.invoke(app, ["calculate", name, name])
+
+        assert calculate_result.exit_code == 0

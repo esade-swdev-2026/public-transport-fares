@@ -44,13 +44,15 @@ Output:
 
 ```text
 Catalunya            Zone 1
-Sagrada Familia      Zone 1
-Sants Estacio        Zone 1
-Zona Universitaria   Zone 1
 Rubi                 Zone 2
+Sagrada Familia      Zone 1
 Sant Cugat           Zone 2
+Sants Estacio        Zone 1
 Terrassa             Zone 3
+Zona Universitaria   Zone 1
 ```
+
+Stations are listed alphabetically by name, so a name shown here can be passed directly to `fares calculate`.
 
 Valid passenger types are:
 

@@ -37,15 +37,20 @@ def test_list_stations_includes_every_station() -> None:
     assert len(list_stations()) == len(STATIONS)
 
 
-def test_list_stations_is_sorted_by_zone_then_name() -> None:
+def test_list_stations_is_sorted_alphabetically_by_name() -> None:
     names = [station.name for station in list_stations()]
 
     assert names == [
         "Catalunya",
-        "Sagrada Familia",
-        "Sants Estacio",
-        "Zona Universitaria",
         "Rubi",
+        "Sagrada Familia",
         "Sant Cugat",
+        "Sants Estacio",
         "Terrassa",
+        "Zona Universitaria",
     ]
+
+
+def test_every_listed_station_name_resolves_to_its_own_zone() -> None:
+    for station in list_stations():
+        assert get_station_zone(station.name) == station.zone
