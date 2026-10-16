@@ -1,6 +1,6 @@
 import pytest
 
-from public_transport_fares.stations import get_station_zone
+from public_transport_fares.stations import STATIONS, get_station_zone, list_stations
 
 
 def test_station_in_zone_one() -> None:
@@ -31,3 +31,21 @@ def test_unknown_station_raises_error() -> None:
 def test_empty_station_raises_error() -> None:
     with pytest.raises(KeyError):
         get_station_zone("")
+
+
+def test_list_stations_includes_every_station() -> None:
+    assert len(list_stations()) == len(STATIONS)
+
+
+def test_list_stations_is_sorted_by_zone_then_name() -> None:
+    names = [station.name for station in list_stations()]
+
+    assert names == [
+        "Catalunya",
+        "Sagrada Familia",
+        "Sants Estacio",
+        "Zona Universitaria",
+        "Rubi",
+        "Sant Cugat",
+        "Terrassa",
+    ]
