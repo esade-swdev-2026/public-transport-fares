@@ -78,3 +78,35 @@ def test_each_listed_station_name_can_be_used_to_calculate_a_fare() -> None:
         calculate_result = runner.invoke(app, ["calculate", name, name])
 
         assert calculate_result.exit_code == 0
+
+
+def test_calculate_with_ten_trip_ticket() -> None:
+    result = runner.invoke(
+        app,
+        ["calculate", "Catalunya", "Terrassa", "--ticket", "10-trip"],
+    )
+
+    assert result.exit_code == 0
+    assert "36.00 €" in result.stdout
+
+
+def test_calculate_rejects_invalid_ticket() -> None:
+    result = runner.invoke(
+        app,
+        ["calculate", "Catalunya", "Terrassa", "--ticket", "weekly"],
+    )
+
+    assert result.exit_code == 1
+    assert "Invalid ticket type" in result.stderr
+    assert "Traceback" not in result.stderr
+
+
+def test_calculate_displays_ticket_type() -> None:
+    result = runner.invoke(
+        app,
+        ["calculate", "Catalunya", "Terrassa", "--ticket", "monthly"],
+    )
+
+    assert result.exit_code == 0
+    assert "ticket type monthly" in result.stdout
+    assert "72.00 €" in result.stdout

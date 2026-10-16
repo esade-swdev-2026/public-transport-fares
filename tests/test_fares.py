@@ -3,6 +3,7 @@ import pytest
 from public_transport_fares.fares import (
     apply_passenger_discount,
     calculate_fare,
+    calculate_ticket_price,
     is_valid_passenger_type,
     price_for_zones,
 )
@@ -77,3 +78,40 @@ def test_invalid_passenger_discount_raises_error() -> None:
 def test_price_for_unknown_number_of_zones_raises_error() -> None:
     with pytest.raises(ValueError, match="No fare defined for 4 zones"):
         price_for_zones(4)
+
+
+def test_ten_trip_ticket_price() -> None:
+    assert calculate_ticket_price(2.50, "10-trip") == 20.00
+
+
+def test_monthly_ticket_price() -> None:
+    assert calculate_ticket_price(2.50, "monthly") == 40.00
+
+
+def test_invalid_ticket_type() -> None:
+    with pytest.raises(ValueError, match="Invalid ticket type"):
+        calculate_ticket_price(2.50, "weekly")
+
+
+@pytest.mark.parametrize(
+    ("single_price", "expected_price"),
+    [
+        (2.50, 20.00),
+        (3.50, 28.00),
+        (4.50, 36.00),
+    ],
+)
+def test_ten_trip_price_for_each_zone(single_price: float, expected_price: float) -> None:
+    assert calculate_ticket_price(single_price, "10-trip") == pytest.approx(expected_price)
+
+
+@pytest.mark.parametrize(
+    ("single_price", "expected_price"),
+    [
+        (2.50, 40.00),
+        (3.50, 56.00),
+        (4.50, 72.00),
+    ],
+)
+def test_monthly_price_for_each_zone(single_price: float, expected_price: float) -> None:
+    assert calculate_ticket_price(single_price, "monthly") == pytest.approx(expected_price)
