@@ -4,7 +4,6 @@ from public_transport_fares.fares import (
     apply_passenger_discount,
     calculate_fare,
     is_valid_passenger_type,
-    price_for_zones,
 )
 
 
@@ -72,8 +71,3 @@ def test_invalid_passenger_discount_raises_error() -> None:
         ValueError, match="Invalid passenger type. Options: adult, child, student, senior."
     ):
         apply_passenger_discount(4.50, "dog")
-
-
-def test_price_for_unknown_number_of_zones_raises_error() -> None:
-    with pytest.raises(ValueError, match="No fare defined for 4 zones"):
-        price_for_zones(4)

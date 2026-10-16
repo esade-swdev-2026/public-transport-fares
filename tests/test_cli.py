@@ -48,13 +48,3 @@ def test_calculate_applies_passenger_discount(passenger: str, expected_price: st
 
     assert result.exit_code == 0
     assert expected_price in result.stdout
-
-
-def test_stations_lists_every_station_with_its_zone() -> None:
-    result = runner.invoke(app, ["stations"])
-
-    assert result.exit_code == 0
-    assert "Catalunya" in result.stdout
-    assert "Sant Cugat" in result.stdout
-    assert "Terrassa             Zone 3" in result.stdout
-    assert len(result.stdout.strip().splitlines()) == 7

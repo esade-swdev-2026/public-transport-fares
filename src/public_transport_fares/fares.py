@@ -1,20 +1,10 @@
-from dataclasses import dataclass
+FARE_PRICES = {
+    1: 2.50,
+    2: 3.50,
+    3: 4.50,
+}
 
-
-@dataclass(frozen=True)
-class Fare:
-    zones: int
-    price: float
-
-
-FARE_PRICES = (
-    Fare(zones=1, price=2.50),
-    Fare(zones=2, price=3.50),
-    Fare(zones=3, price=4.50),
-)
-
-VALID_ZONES = {fare.zones for fare in FARE_PRICES}
-
+# Discount per passenger type, as agreed by the team for backlog item 3.
 PASSENGER_DISCOUNTS = {
     "adult": 0.0,
     "child": 0.5,
@@ -23,23 +13,16 @@ PASSENGER_DISCOUNTS = {
 }
 
 
-def price_for_zones(number_of_zones: int) -> float:
-    for fare in FARE_PRICES:
-        if fare.zones == number_of_zones:
-            return fare.price
-    raise ValueError(f"No fare defined for {number_of_zones} zones")
-
-
 def calculate_fare(origin_zone: int, destination_zone: int) -> float:
-    if origin_zone not in VALID_ZONES:
+    if origin_zone not in FARE_PRICES:
         raise ValueError("Invalid origin zone")
 
-    if destination_zone not in VALID_ZONES:
+    if destination_zone not in FARE_PRICES:
         raise ValueError("Invalid destination zone")
 
     number_of_zones = abs(destination_zone - origin_zone) + 1
 
-    return price_for_zones(number_of_zones)
+    return FARE_PRICES[number_of_zones]
 
 
 def is_valid_passenger_type(passenger: str) -> bool:
@@ -48,6 +31,6 @@ def is_valid_passenger_type(passenger: str) -> bool:
 
 def apply_passenger_discount(price: float, passenger: str) -> float:
     if not is_valid_passenger_type(passenger):
-        raise ValueError("Invalid passenger type. Options: adult, child, student, senior.")
+        raise ValueError("Invalid passenger type: Options: adult, child, student, senior.")
 
     return price * (1 - PASSENGER_DISCOUNTS[passenger])
