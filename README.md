@@ -145,3 +145,11 @@ The initial version of Public Transport Fares uses a simplified simulation of Ba
 - The application runs exclusively through the command line.
 
 These assumptions are intentional simplifications for the first version. Additional functionality will be introduced incrementally through the Product Backlog.
+
+## Use of AI Tools
+
+We used ChatGPT and Claude to support us during the development of this project, mainly for understanding programming concepts, planning features, debugging, and reviewing code.
+
+Our team made the decisions about the project's functionality and requirements. We reviewed the suggestions, tested the application, and took responsibility for the final implementation.
+
+AI tools were used as support throughout the process, but the final decisions and responsibility for the project remain with our team.
