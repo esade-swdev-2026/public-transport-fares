@@ -126,6 +126,61 @@ If `--ticket` is omitted, the application calculates a single ticket by default.
 
 Invalid ticket types display an error message and exit with a non-zero status code. The prices and discounts are simulated for this academic project and do not represent official public transport fares.
 
+### Ticket Recommendation
+
+Passengers can use the recommend command to find the cheapest ticket type based on the number of journeys they expect to make in a month.
+
+The application compares the total cost of single tickets, 10-trip tickets, and monthly tickets using the existing simulated fare prices.
+
+| Ticket type | Calculation |
+|---|---|
+|  `single`   |   Single ticket price multiplied by the number of journeys |
+|  `10-trip`  |   Price of the 10-trip passes needed to cover all journeys |
+|  `monthly`  |   Fixed monthly price based on the number of fare zones |
+
+Examples
+Recommend a ticket for 5 journeys within one fare zone:
+```bash
+uv run fares recommend "Catalunya" "Sagrada Familia" --journeys 5
+```
+
+Expected output:
+```text
+Recommended ticket: single
+Journeys per month: 5
+Total cost: 12.50 €
+```
+
+Recommend a ticket for 10 journeys between two fare zones:
+```bash
+uv run fares recommend "Catalunya" "Sant Cugat" --journeys 10
+```
+
+Expected output:
+```text
+Recommended ticket: 10-trip
+Journeys per month: 10
+Total cost: 28.00 €
+```
+
+Recommend a ticket for 30 journeys between three fare zones:
+```bash
+uv run fares recommend "Catalunya" "Terrassa" --journeys 30
+```
+
+Expected output:
+```text
+Recommended ticket: monthly
+Journeys per month: 30
+Total cost: 72.00 €
+```
+
+The number of journeys must be a positive integer. Zero or negative values display an error message and exit with a non-zero status code.
+
+Unknown station names are handled in the same way as in the calculate command.
+
+The recommendation uses adult fares and compares each ticket type separately. It does not combine different ticket types or apply passenger discounts. If two options have the same cost, the application selects the first one in the order: single, 10-trip, monthly.
+
 ### Unknown Station Errors
 
 Station names are case-insensitive, and extra spaces at the beginning or end are ignored.
@@ -202,6 +257,7 @@ The initial version of Public Transport Fares uses a simplified simulation of Ba
 
 - The default passenger is an adult. Child, student and senior passengers receive a fixed percentage discount on the adult fare.
 - Three ticket types are supported: single, 10-trip, and monthly.
+- The application recommends the cheapest ticket type based on the expected number of monthly journeys, using adult fares without combining different ticket types.
 - Ticket prices and passenger discounts are simulated and do not represent official Barcelona public transport fares.
 - The simulation is limited to metro travel, seven predefined stations, and three fare zones.
 - Each station belongs to exactly one zone.
