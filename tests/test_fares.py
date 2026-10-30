@@ -6,6 +6,7 @@ from public_transport_fares.fares import (
     calculate_ticket_price,
     is_valid_passenger_type,
     price_for_zones,
+    recommend_ticket,
 )
 
 
@@ -115,3 +116,44 @@ def test_ten_trip_price_for_each_zone(single_price: float, expected_price: float
 )
 def test_monthly_price_for_each_zone(single_price: float, expected_price: float) -> None:
     assert calculate_ticket_price(single_price, "monthly") == pytest.approx(expected_price)
+
+
+def test_recommend_cheapest_ticket_for_five_journeys() -> None:
+    result = recommend_ticket(single_price=2.50, journeys=5)
+
+    assert result == ("single", 12.50)
+
+
+def test_recommend_ten_trip_ticket() -> None:
+    result = recommend_ticket(single_price=2.50, journeys=10)
+    assert result == ("10-trip", 20.00)
+
+
+def test_recommend_monthly_ticket() -> None:
+    result = recommend_ticket(single_price=2.50, journeys=30)
+    assert result == ("monthly", 40.00)
+
+
+def test_recommend_ticket_with_zero_journeys() -> None:
+    result = recommend_ticket(single_price=2.50, journeys=0)
+    assert result == ("single", 0.0)
+
+
+def test_recommend_ticket_with_negative_journeys() -> None:
+    with pytest.raises(ValueError, match="Number of journeys cannot be negative"):
+        recommend_ticket(single_price=2.50, journeys=-5)
+
+
+def test_recommend_ticket_for_two_zones() -> None:
+    result = recommend_ticket(single_price=3.50, journeys=30)
+    assert result == ("monthly", 56.00)
+
+
+def test_recommend_ticket_with_negative_price() -> None:
+    with pytest.raises(ValueError, match="Single ticket price cannot be negative"):
+        recommend_ticket(single_price=-2.50, journeys=10)
+
+
+def test_recommend_ticket_with_equal_prices() -> None:
+    result = recommend_ticket(single_price=2.50, journeys=20)
+    assert result == ("10-trip", 40.00)

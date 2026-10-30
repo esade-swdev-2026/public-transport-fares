@@ -74,3 +74,32 @@ def calculate_ticket_price(single_price: float, ticket_type: str) -> float:
 
 def is_valid_ticket_type(ticket_type: str) -> bool:
     return ticket_type in TICKET_TYPES
+
+
+def recommend_ticket(single_price: float, journeys: int) -> tuple[str, float]:
+    if single_price < 0:
+        raise ValueError("Single ticket price cannot be negative")
+
+    if journeys < 0:
+        raise ValueError("Number of journeys cannot be negative.")
+
+    if journeys == 0:
+        return ("single", 0.0)
+
+    single_total = single_price * journeys
+
+    ten_trip_price = calculate_ticket_price(single_price, "10-trip")
+    ten_trip_packs = (journeys + TEN_TRIP_JOURNEYS - 1) // TEN_TRIP_JOURNEYS
+    ten_trip_total = ten_trip_price * ten_trip_packs
+
+    monthly_total = calculate_ticket_price(single_price, "monthly")
+
+    options = {
+        "single": single_total,
+        "10-trip": ten_trip_total,
+        "monthly": monthly_total,
+    }
+
+    cheapest_ticket = min(options, key=lambda ticket: options[ticket])
+
+    return cheapest_ticket, options[cheapest_ticket]

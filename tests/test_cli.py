@@ -110,3 +110,56 @@ def test_calculate_displays_ticket_type() -> None:
     assert result.exit_code == 0
     assert "ticket type monthly" in result.stdout
     assert "72.00 €" in result.stdout
+
+
+def test_recommend_single_ticket() -> None:
+    result = runner.invoke(
+        app,
+        ["recommend", "Catalunya", "Sagrada Familia", "--journeys", "5"],
+    )
+
+    assert result.exit_code == 0
+    assert "Recommended ticket: single" in result.output
+    assert "Total cost: 12.50 €" in result.output
+
+
+def test_recommend_ten_trip_ticket() -> None:
+    result = runner.invoke(
+        app,
+        ["recommend", "Catalunya", "Sant Cugat", "--journeys", "10"],
+    )
+
+    assert result.exit_code == 0
+    assert "Recommended ticket: 10-trip" in result.output
+    assert "Total cost: 28.00 €" in result.output
+
+
+def test_recommend_monthly_ticket() -> None:
+    result = runner.invoke(
+        app,
+        ["recommend", "Catalunya", "Terrassa", "--journeys", "30"],
+    )
+
+    assert result.exit_code == 0
+    assert "Recommended ticket: monthly" in result.output
+    assert "Total cost: 72.00 €" in result.output
+
+
+def test_recommend_negative_journeys() -> None:
+    result = runner.invoke(
+        app,
+        ["recommend", "Catalunya", "Terrassa", "--journeys", "-5"],
+    )
+
+    assert result.exit_code == 1
+    assert "number of journeys must be greater than zero" in result.output
+
+
+def test_recommend_unknown_station() -> None:
+    result = runner.invoke(
+        app,
+        ["recommend", "Unknown", "Terrassa", "--journeys", "10"],
+    )
+
+    assert result.exit_code == 1
+    assert "unknown station" in result.output
