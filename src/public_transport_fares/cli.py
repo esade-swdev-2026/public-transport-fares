@@ -75,8 +75,16 @@ def recommend(
         "--journeys",
         help="Expected number of journeys per month.",
     ),
+    passenger: str = "adult",
 ) -> None:
     """Recommend the cheapest ticket for a number of monthly journeys."""
+
+    if not is_valid_passenger_type(passenger):
+        typer.echo(
+            f"Error: unknown passenger type '{passenger}'.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
 
     if journeys <= 0:
         typer.echo(
@@ -97,11 +105,13 @@ def recommend(
         )
         raise typer.Exit(code=1) from None
 
-    single_price = calculate_fare(origin_zone, destination_zone)
+    adult_single_price = calculate_fare(origin_zone, destination_zone)
+    single_price = apply_passenger_discount(adult_single_price, passenger)
     ticket_type, total_price = recommend_ticket(single_price, journeys)
 
     typer.echo(
         f"Recommended ticket: {ticket_type}\n"
+        f"Passenger type: {passenger}\n"
         f"Journeys per month: {journeys}\n"
         f"Total cost: {total_price:.2f} €"
     )

@@ -147,6 +147,7 @@ uv run fares recommend "Catalunya" "Sagrada Familia" --journeys 5
 Expected output:
 ```text
 Recommended ticket: single
+Passenger type: adult
 Journeys per month: 5
 Total cost: 12.50 €
 ```
@@ -159,6 +160,7 @@ uv run fares recommend "Catalunya" "Sant Cugat" --journeys 10
 Expected output:
 ```text
 Recommended ticket: 10-trip
+Passenger type: adult
 Journeys per month: 10
 Total cost: 28.00 €
 ```
@@ -171,15 +173,29 @@ uv run fares recommend "Catalunya" "Terrassa" --journeys 30
 Expected output:
 ```text
 Recommended ticket: monthly
+Passenger type: adult
 Journeys per month: 30
 Total cost: 72.00 €
 ```
 
 The number of journeys must be a positive integer. Zero or negative values display an error message and exit with a non-zero status code.
 
-Unknown station names are handled in the same way as in the calculate command.
+Recommend a ticket for a student making 30 journeys between three fare zones:
+```bash
+uv run fares recommend "Catalunya" "Terrassa" --journeys 30 --passenger student
+```
 
-The recommendation uses adult fares and compares each ticket type separately. It does not combine different ticket types or apply passenger discounts. If two options have the same cost, the application selects the first one in the order: single, 10-trip, monthly.
+Expected output:
+```text
+Recommended ticket: monthly
+Passenger type: student
+Journeys per month: 30
+Total cost: 57.60 €
+```
+
+If `--passenger` is omitted, the recommendation uses adult fares. Unknown passenger types and unknown station names are handled in the same way as in the calculate command.
+
+The passenger discount is applied to every ticket type before they are compared. The recommendation compares each ticket type separately and does not combine different ticket types. If two options have the same cost, the application selects the first one in the order: single, 10-trip, monthly.
 
 ### Unknown Station Errors
 
@@ -257,7 +273,7 @@ The initial version of Public Transport Fares uses a simplified simulation of Ba
 
 - The default passenger is an adult. Child, student and senior passengers receive a fixed percentage discount on the adult fare.
 - Three ticket types are supported: single, 10-trip, and monthly.
-- The application recommends the cheapest ticket type based on the expected number of monthly journeys, using adult fares without combining different ticket types.
+- The application recommends the cheapest ticket type based on the expected number of monthly journeys and the passenger type, without combining different ticket types.
 - Ticket prices and passenger discounts are simulated and do not represent official Barcelona public transport fares.
 - The simulation is limited to metro travel, seven predefined stations, and three fare zones.
 - Each station belongs to exactly one zone.

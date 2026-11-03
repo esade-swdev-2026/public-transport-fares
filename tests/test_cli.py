@@ -163,3 +163,51 @@ def test_recommend_unknown_station() -> None:
 
     assert result.exit_code == 1
     assert "unknown station" in result.output
+
+
+def test_recommend_applies_student_discount() -> None:
+    result = runner.invoke(
+        app,
+        [
+            "recommend",
+            "Catalunya",
+            "Terrassa",
+            "--journeys",
+            "30",
+            "--passenger",
+            "student",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "Recommended ticket: monthly" in result.output
+    assert "Passenger type: student" in result.output
+    assert "Total cost: 57.60 €" in result.output
+
+
+def test_recommend_defaults_to_adult_passenger() -> None:
+    result = runner.invoke(
+        app,
+        ["recommend", "Catalunya", "Sagrada Familia", "--journeys", "5"],
+    )
+
+    assert result.exit_code == 0
+    assert "Passenger type: adult" in result.output
+
+
+def test_recommend_unknown_passenger_type() -> None:
+    result = runner.invoke(
+        app,
+        [
+            "recommend",
+            "Catalunya",
+            "Terrassa",
+            "--journeys",
+            "10",
+            "--passenger",
+            "dog",
+        ],
+    )
+
+    assert result.exit_code == 1
+    assert "unknown passenger type 'dog'" in result.output
