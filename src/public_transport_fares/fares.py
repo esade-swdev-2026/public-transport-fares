@@ -7,6 +7,12 @@ class Fare:
     price: float
 
 
+@dataclass(frozen=True)
+class Recommendation:
+    ticket_type: str
+    total_price: float
+
+
 FARE_PRICES = (
     Fare(zones=1, price=2.50),
     Fare(zones=2, price=3.50),
@@ -76,7 +82,7 @@ def is_valid_ticket_type(ticket_type: str) -> bool:
     return ticket_type in TICKET_TYPES
 
 
-def recommend_ticket(single_price: float, journeys: int) -> tuple[str, float]:
+def recommend_ticket(single_price: float, journeys: int) -> Recommendation:
     if single_price < 0:
         raise ValueError("Single ticket price cannot be negative")
 
@@ -84,7 +90,7 @@ def recommend_ticket(single_price: float, journeys: int) -> tuple[str, float]:
         raise ValueError("Number of journeys cannot be negative.")
 
     if journeys == 0:
-        return ("single", 0.0)
+        return Recommendation(ticket_type="single", total_price=0.0)
 
     single_total = single_price * journeys
 
@@ -102,4 +108,4 @@ def recommend_ticket(single_price: float, journeys: int) -> tuple[str, float]:
 
     cheapest_ticket = min(options, key=lambda ticket: options[ticket])
 
-    return cheapest_ticket, options[cheapest_ticket]
+    return Recommendation(ticket_type=cheapest_ticket, total_price=options[cheapest_ticket])

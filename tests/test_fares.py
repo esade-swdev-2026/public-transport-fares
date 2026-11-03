@@ -1,6 +1,7 @@
 import pytest
 
 from public_transport_fares.fares import (
+    Recommendation,
     apply_passenger_discount,
     calculate_fare,
     calculate_ticket_price,
@@ -121,22 +122,22 @@ def test_monthly_price_for_each_zone(single_price: float, expected_price: float)
 def test_recommend_cheapest_ticket_for_five_journeys() -> None:
     result = recommend_ticket(single_price=2.50, journeys=5)
 
-    assert result == ("single", 12.50)
+    assert result == Recommendation(ticket_type="single", total_price=12.50)
 
 
 def test_recommend_ten_trip_ticket() -> None:
     result = recommend_ticket(single_price=2.50, journeys=10)
-    assert result == ("10-trip", 20.00)
+    assert result == Recommendation(ticket_type="10-trip", total_price=20.00)
 
 
 def test_recommend_monthly_ticket() -> None:
     result = recommend_ticket(single_price=2.50, journeys=30)
-    assert result == ("monthly", 40.00)
+    assert result == Recommendation(ticket_type="monthly", total_price=40.00)
 
 
 def test_recommend_ticket_with_zero_journeys() -> None:
     result = recommend_ticket(single_price=2.50, journeys=0)
-    assert result == ("single", 0.0)
+    assert result == Recommendation(ticket_type="single", total_price=0.0)
 
 
 def test_recommend_ticket_with_negative_journeys() -> None:
@@ -146,7 +147,7 @@ def test_recommend_ticket_with_negative_journeys() -> None:
 
 def test_recommend_ticket_for_two_zones() -> None:
     result = recommend_ticket(single_price=3.50, journeys=30)
-    assert result == ("monthly", 56.00)
+    assert result == Recommendation(ticket_type="monthly", total_price=56.00)
 
 
 def test_recommend_ticket_with_negative_price() -> None:
@@ -156,4 +157,12 @@ def test_recommend_ticket_with_negative_price() -> None:
 
 def test_recommend_ticket_with_equal_prices() -> None:
     result = recommend_ticket(single_price=2.50, journeys=20)
-    assert result == ("10-trip", 40.00)
+    assert result == Recommendation(ticket_type="10-trip", total_price=40.00)
+
+
+def test_recommend_ticket_returns_a_recommendation() -> None:
+    result = recommend_ticket(single_price=2.50, journeys=30)
+
+    assert isinstance(result, Recommendation)
+    assert result.ticket_type == "monthly"
+    assert result.total_price == 40.00
