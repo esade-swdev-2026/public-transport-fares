@@ -1,3 +1,5 @@
+from dataclasses import FrozenInstanceError
+
 import pytest
 
 from public_transport_fares.fares import (
@@ -160,9 +162,8 @@ def test_recommend_ticket_with_equal_prices() -> None:
     assert result == Recommendation(ticket_type="10-trip", total_price=40.00)
 
 
-def test_recommend_ticket_returns_a_recommendation() -> None:
+def test_recommendation_is_immutable() -> None:
     result = recommend_ticket(single_price=2.50, journeys=30)
 
-    assert isinstance(result, Recommendation)
-    assert result.ticket_type == "monthly"
-    assert result.total_price == 40.00
+    with pytest.raises(FrozenInstanceError):
+        result.total_price = 50.00  # type: ignore[misc]
