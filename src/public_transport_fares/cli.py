@@ -109,9 +109,9 @@ def recommend(
         )
         raise typer.Exit(code=1) from None
 
-    adult_single_price = calculate_fare(origin_zone, destination_zone)
-    single_price = apply_passenger_discount(adult_single_price, passenger)
-    ticket_type, total_price = recommend_ticket(single_price, journeys)
+    single_price = calculate_fare(origin_zone, destination_zone)
+    ticket_type, adult_total = recommend_ticket(single_price, journeys)
+    total_price = apply_passenger_discount(adult_total, passenger)
 
     typer.echo(
         f"Recommended ticket: {ticket_type}\n"
