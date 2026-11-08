@@ -193,6 +193,7 @@ def test_recommend_defaults_to_adult_passenger() -> None:
 
     assert result.exit_code == 0
     assert "Passenger type: adult" in result.output
+    assert "Total cost: 12.50 €" in result.output
 
 
 def test_recommend_unknown_passenger_type() -> None:
