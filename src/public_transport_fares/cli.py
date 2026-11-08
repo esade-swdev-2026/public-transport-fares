@@ -13,6 +13,16 @@ from public_transport_fares.stations import get_station_zone, list_stations
 app = typer.Typer(help="Calculate public transport fares between stations.")
 
 
+def check_passenger_type(passenger: str) -> None:
+    """Stop with an error if the passenger type is not valid."""
+    if not is_valid_passenger_type(passenger):
+        typer.echo(
+            f"Error: unknown passenger type '{passenger}'. Options: adult, child, student, senior.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+
 @app.command()
 def calculate(
     origin: str,
@@ -22,12 +32,7 @@ def calculate(
 ) -> None:
     """Calculate the fare between two stations."""
 
-    if not is_valid_passenger_type(passenger):
-        typer.echo(
-            f"Error: unknown passenger type '{passenger}'.",
-            err=True,
-        )
-        raise typer.Exit(code=1)
+    check_passenger_type(passenger)
 
     if not is_valid_ticket_type(ticket):
         typer.echo(
@@ -75,8 +80,15 @@ def recommend(
         "--journeys",
         help="Expected number of journeys per month.",
     ),
+    passenger: str = typer.Option(
+        "adult",
+        "--passenger",
+        help="Passenger type: adult, child, student or senior.",
+    ),
 ) -> None:
     """Recommend the cheapest ticket for a number of monthly journeys."""
+
+    check_passenger_type(passenger)
 
     if journeys <= 0:
         typer.echo(
@@ -99,9 +111,11 @@ def recommend(
 
     single_price = calculate_fare(origin_zone, destination_zone)
     recommendation = recommend_ticket(single_price, journeys)
+    total_price = apply_passenger_discount(recommendation.total_price, passenger)
 
     typer.echo(
         f"Recommended ticket: {recommendation.ticket_type}\n"
+        f"Passenger type: {passenger}\n"
         f"Journeys per month: {journeys}\n"
-        f"Total cost: {recommendation.total_price:.2f} €"
+        f"Total cost: {total_price:.2f} €"
     )
