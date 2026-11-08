@@ -118,4 +118,4 @@ def recommend(
         f"Passenger type: {passenger}\n"
         f"Journeys per month: {journeys}\n"
         f"Total cost: {total_price:.2f} €"
-    )   
+    )
