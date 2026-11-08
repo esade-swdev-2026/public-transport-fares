@@ -75,7 +75,11 @@ def recommend(
         "--journeys",
         help="Expected number of journeys per month.",
     ),
-    passenger: str = "adult",
+    passenger: str = typer.Option(
+        "adult",
+        "--passenger",
+        help="Passenger type: adult, child, student or senior.",
+    ),
 ) -> None:
     """Recommend the cheapest ticket for a number of monthly journeys."""
 
