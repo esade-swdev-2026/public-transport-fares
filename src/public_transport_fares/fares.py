@@ -106,6 +106,7 @@ def recommend_ticket(single_price: float, journeys: int) -> Recommendation:
         "monthly": monthly_total,
     }
 
+    # On a tie, min keeps the first option in the dict: single, then 10-trip, then monthly.
     cheapest_ticket = min(options, key=lambda ticket: options[ticket])
 
     return Recommendation(ticket_type=cheapest_ticket, total_price=options[cheapest_ticket])
