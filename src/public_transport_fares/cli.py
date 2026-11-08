@@ -13,6 +13,16 @@ from public_transport_fares.stations import get_station_zone, list_stations
 app = typer.Typer(help="Calculate public transport fares between stations.")
 
 
+def check_passenger_type(passenger: str) -> None:
+    """Stop with an error if the passenger type is not valid."""
+    if not is_valid_passenger_type(passenger):
+        typer.echo(
+            f"Error: unknown passenger type '{passenger}'. Options: adult, child, student, senior.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+
 @app.command()
 def calculate(
     origin: str,
@@ -22,12 +32,7 @@ def calculate(
 ) -> None:
     """Calculate the fare between two stations."""
 
-    if not is_valid_passenger_type(passenger):
-        typer.echo(
-            f"Error: unknown passenger type '{passenger}'.",
-            err=True,
-        )
-        raise typer.Exit(code=1)
+    check_passenger_type(passenger)
 
     if not is_valid_ticket_type(ticket):
         typer.echo(
@@ -83,12 +88,7 @@ def recommend(
 ) -> None:
     """Recommend the cheapest ticket for a number of monthly journeys."""
 
-    if not is_valid_passenger_type(passenger):
-        typer.echo(
-            f"Error: unknown passenger type '{passenger}'.",
-            err=True,
-        )
-        raise typer.Exit(code=1)
+    check_passenger_type(passenger)
 
     if journeys <= 0:
         typer.echo(
