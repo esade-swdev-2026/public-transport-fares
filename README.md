@@ -316,52 +316,72 @@ To run all project checks from the repository root:
 
 This script checks code quality with Ruff, verifies formatting, checks type annotations with Mypy, and runs the automated tests with Pytest.
 
+
 ## Layout
 
 ```text
 public-transport-fares/
 ├── src/
 │   └── public_transport_fares/
+│       ├── __init__.py
 │       ├── __main__.py
 │       ├── cli.py
+│       ├── config.py
+│       ├── fares.json
 │       ├── fares.py
 │       └── stations.py
 ├── tests/
 │   ├── test_cli.py
+│   ├── test_config.py
 │   ├── test_fares.py
 │   └── test_stations.py
 ├── scripts/
 │   └── check.sh
+├── my-fares.json
+├── README.md
+├── LICENSE
 ├── pyproject.toml
 └── uv.lock
 ```
 
-- `cli.py`: command-line interface built with Typer.
-- `fares.py`: fare calculations, ticket prices, and passenger discounts.
-- `stations.py`: station information and fare zones.
-- `tests/`: automated tests.
-- `scripts/check.sh`: runs the project quality checks.
+- `cli.py`: command-line interface built with Typer. Handles user input, displays results, and reports errors.
+- `config.py`: loads and validates fare configuration from default or external JSON files.
+- `fares.json`: default fare prices and passenger discounts included in the application package.
+- `fares.py`: pure functions for fare calculations, ticket pricing, passenger discounts, and ticket recommendations.
+- `stations.py`: station information, fare zones, and station lookup functions.
+- `my-fares.json`: example of a custom fare configuration that users can modify without changing the Python code.
+- `tests/`: automated tests covering fare calculations, configuration loading, command-line functionality, and edge cases.
+- `scripts/check.sh`: runs the project's Ruff, mypy, and pytest quality checks.
+- `pyproject.toml`: project metadata, dependencies, and development tool configuration.
+- `uv.lock`: locked dependency versions for reproducible installation.
+
+The project follows the functional core and imperative shell principle. Fare calculations are separated from file operations and user interaction, making the business logic easier to test and maintain.
 
 ### Current Assumptions and Limitations
 
-The initial version of Public Transport Fares uses a simplified simulation of Barcelona's fare system.
+Public Transport Fares uses a simplified simulation of Barcelona's fare system.
 
-- The default passenger is an adult. Child, student and senior passengers receive a fixed percentage discount on the adult fare.
+- The default passenger is an adult. Child, student, and senior passengers receive configurable percentage discounts on the adult fare.
 - Three ticket types are supported: single, 10-trip, and monthly.
-- The application recommends the cheapest ticket type based on the expected number of monthly journeys and the passenger type, without combining different ticket types.
+- The application recommends the cheapest ticket type based on the expected number of monthly journeys and passenger type, without combining different ticket types.
 - Ticket prices and passenger discounts are simulated and do not represent official Barcelona public transport fares.
 - The simulation is limited to metro travel, seven predefined stations, and three fare zones.
 - Each station belongs to exactly one zone.
-- Single-ticket prices are €2.50, €3.50, and €4.50 for one, two, and three zones respectively. The prices of 10-trip and monthly tickets are calculated from these base fares.
+- Default single-ticket prices are €2.50, €3.50, and €4.50 for one, two, and three zones respectively.
+- The prices of 10-trip and monthly tickets are calculated from the single-ticket fare using fixed pricing rules defined in the application.
 - Fare zones are calculated using the absolute difference between zone numbers plus one.
 - Journeys within the same zone count as one zone, and fares are identical in both directions.
+- Fare prices and passenger discounts are stored in a JSON configuration file rather than being hardcoded in the calculation functions.
+- Users can provide an external configuration file using the `--fares` option, allowing fare prices and passenger discounts to change without modifying the Python source code.
+- The application validates configuration files and rejects missing, malformed, or invalid fare data.
+- Station names and their assigned zones remain predefined in `stations.py`.
 - Actual routes, distances, stops, transfers, and travel times are not considered.
-- Prices do not change based on time or day.
-- Stations and fares are defined directly in the code.
+- Prices do not change automatically based on time or day.
 - The application does not yet store journeys, calculate monthly spending, or access live transport information.
 - The application runs exclusively through the command line.
+- Docker containerization and external configuration through bind mounts are part of the next development stage.
 
-These assumptions are intentional simplifications for the first version. Additional functionality will be introduced incrementally through the Product Backlog.
+These assumptions are intentional simplifications for the current version. Additional functionality will be introduced incrementally through the Product Backlog.
 
 ## Use of AI Tools
 
