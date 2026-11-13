@@ -218,6 +218,81 @@ Error: unknown station 'madrid'. Use 'fares stations' to see valid stations.
 The application exits with a non-zero exit code and does not display a Python traceback.
 
 
+## Custom Fare Configuration
+
+The application supports loading fare prices and passenger discounts
+from an external JSON file.
+
+By default, the application uses `fares.json` included in the package.
+Users can provide a different configuration using the `--fares` option.
+
+### Default fares
+
+Calculate a fare using the default configuration:
+
+```bash
+uv run fares calculate "Catalunya" "Terrassa"
+```
+
+Expected price: 4.50 €.
+
+### Custom fares
+
+A sample configuration is provided in `my-fares.json`:
+
+```json
+{
+  "fare_prices": {
+    "1": 3.00,
+    "2": 4.00,
+    "3": 5.00
+  },
+  "passenger_discounts": {
+    "adult": 0.0,
+    "child": 0.5,
+    "student": 0.3,
+    "senior": 0.4
+  }
+}
+```
+
+To calculate a fare using this file:
+
+```bash
+uv run fares calculate "Catalunya" "Terrassa" --fares my-fares.json
+```
+
+Expected price: 5.00 €.
+
+To apply a custom student discount:
+
+```bash
+uv run fares calculate "Catalunya" "Terrassa" --passenger student --fares my-fares.json
+```
+
+Expected price: 3.50 €.
+
+The custom configuration also works with ticket recommendations:
+
+```bash
+uv run fares recommend "Catalunya" "Terrassa" --journeys 5 --fares my-fares.json
+```
+
+The application validates the configuration before using it.
+
+- Fare prices must be positive numbers.
+- Zones 1, 2 and 3 must be defined.
+- Discounts must be between 0 and 1.
+- Adult, child, student and senior discounts must be present.
+- Missing or invalid files produce an error and a non-zero exit code.
+
+Changing the external JSON file changes the fares without modifying
+the application source code.
+
+This feature implements Product Backlog Item 7 and addresses
+GitHub Issue #10.
+
+
 ## Develop
 
 Run the project checks with:

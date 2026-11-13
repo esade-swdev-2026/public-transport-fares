@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from public_transport_fares.config import FareConfig
+
 
 @dataclass(frozen=True)
 class Fare:
@@ -13,21 +15,6 @@ class Recommendation:
     total_price: float
 
 
-FARE_PRICES = (
-    Fare(zones=1, price=2.50),
-    Fare(zones=2, price=3.50),
-    Fare(zones=3, price=4.50),
-)
-
-VALID_ZONES = {fare.zones for fare in FARE_PRICES}
-
-PASSENGER_DISCOUNTS = {
-    "adult": 0.0,
-    "child": 0.5,
-    "student": 0.2,
-    "senior": 0.4,
-}
-
 TEN_TRIP_JOURNEYS = 10
 TEN_TRIP_DISCOUNT = 0.20
 MONTHLY_BASE_PRICE = 40.00
@@ -35,34 +22,50 @@ SINGLE_BASE_PRICE = 2.50
 TICKET_TYPES = ("single", "10-trip", "monthly")
 
 
-def price_for_zones(number_of_zones: int) -> float:
-    for fare in FARE_PRICES:
-        if fare.zones == number_of_zones:
-            return fare.price
-    raise ValueError(f"No fare defined for {number_of_zones} zones")
+def price_for_zones(
+    number_of_zones: int,
+    config: FareConfig,
+) -> float:
+    if number_of_zones not in config.fare_prices:
+        raise ValueError(f"No fare defined for {number_of_zones} zones")
+
+    return config.fare_prices[number_of_zones]
 
 
-def calculate_fare(origin_zone: int, destination_zone: int) -> float:
-    if origin_zone not in VALID_ZONES:
+def calculate_fare(
+    origin_zone: int,
+    destination_zone: int,
+    config: FareConfig,
+) -> float:
+    valid_zones = set(config.fare_prices)
+
+    if origin_zone not in valid_zones:
         raise ValueError("Invalid origin zone")
 
-    if destination_zone not in VALID_ZONES:
+    if destination_zone not in valid_zones:
         raise ValueError("Invalid destination zone")
 
     number_of_zones = abs(destination_zone - origin_zone) + 1
 
-    return price_for_zones(number_of_zones)
+    return price_for_zones(number_of_zones, config)
 
 
-def is_valid_passenger_type(passenger: str) -> bool:
-    return passenger in PASSENGER_DISCOUNTS
+def is_valid_passenger_type(
+    passenger: str,
+    config: FareConfig,
+) -> bool:
+    return passenger in config.passenger_discounts
 
 
-def apply_passenger_discount(price: float, passenger: str) -> float:
-    if not is_valid_passenger_type(passenger):
+def apply_passenger_discount(
+    price: float,
+    passenger: str,
+    config: FareConfig,
+) -> float:
+    if not is_valid_passenger_type(passenger, config):
         raise ValueError("Invalid passenger type. Options: adult, child, student, senior.")
 
-    return price * (1 - PASSENGER_DISCOUNTS[passenger])
+    return price * (1 - config.passenger_discounts[passenger])
 
 
 def calculate_ticket_price(single_price: float, ticket_type: str) -> float:
