@@ -218,6 +218,43 @@ Error: unknown station 'madrid'. Use 'fares stations' to see valid stations.
 The application exits with a non-zero exit code and does not display a Python traceback.
 
 
+## Run with Docker
+
+Build the Docker image:
+
+```bash id="l1jtc8"
+docker build -t fares .
+```
+
+Display command-line help:
+
+```bash id="k08ft1"
+docker run --rm fares --help
+```
+
+Calculate a fare:
+
+```bash id="jh67c8"
+docker run --rm fares calculate "Catalunya" "Terrassa"
+```
+
+Recommend a ticket:
+
+```bash id="zbk2zn"
+docker run --rm fares recommend "Catalunya" "Terrassa" --journeys 5
+```
+
+Verify that the container runs as a non-root user:
+
+```bash id="3u121m"
+docker run --rm --entrypoint id fares
+```
+
+Fare prices and station data are currently included in the application.
+External JSON configuration will be integrated separately.
+
+
+
 ## Develop
 
 Run the project checks with:
