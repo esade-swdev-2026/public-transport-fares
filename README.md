@@ -254,6 +254,45 @@ Fare prices and station data are currently included in the application.
 External JSON configuration will be integrated separately.
 
 
+### Custom fares with Docker
+
+Fare prices and passenger discounts can be loaded from an external JSON
+file using a read-only bind mount.
+
+Build the image:
+
+```bash
+docker build -t fares .
+```
+
+Calculate a fare with the default configuration:
+
+```bash
+docker run --rm fares calculate "Catalunya" "Terrassa"
+```
+
+Expected fare: 4.50 €.
+
+Use the external configuration file:
+
+```bash
+docker run --rm \
+  --mount type=bind,source="$(pwd)/my-fares.json",target=/config/fares.json,readonly \
+  fares calculate "Catalunya" "Terrassa" \
+  --fares /config/fares.json
+```
+
+Expected fare: 5.00 €.
+
+To verify that the external configuration works without rebuilding
+the image, change the zone 3 price in `my-fares.json` from 5.00 to 6.00
+and run the same Docker command again.
+
+The result changes to 6.00 € without running `docker build` again.
+
+The configuration remains on the host computer and is mounted
+read-only inside the container.
+
 
 ## Develop
 
