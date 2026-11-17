@@ -197,6 +197,23 @@ If `--passenger` is omitted, the recommendation uses adult fares. Unknown passen
 
 The passenger discount is applied to every ticket type before they are compared. The recommendation compares each ticket type separately and does not combine different ticket types. If two options have the same cost, the application selects the first one in the order: single, 10-trip, monthly.
 
+### Track Your Monthly Spending
+
+Save each journey you make. Its single-ticket price, with your passenger discount, is stored in `journeys.json`:
+
+```bash
+uv run fares save "Catalunya" "Terrassa"
+uv run fares save "Terrassa" "Catalunya" --date 2026-11-03 --passenger student
+```
+
+See your journeys and total spending for a month (default: this month):
+
+```bash
+uv run fares spending --month 2026-11
+```
+
+Use `--journal PATH` (or the `FARES_JOURNAL` environment variable) to keep the journeys in another file.
+
 ### Unknown Station Errors
 
 Station names are case-insensitive, and extra spaces at the beginning or end are ignored.
@@ -252,6 +269,18 @@ docker run --rm --entrypoint id fares
 
 Fare prices and station data are currently included in the application.
 External JSON configuration will be integrated separately.
+
+### Saved journeys with Docker
+
+Journeys are saved in `/data` inside the container. Mount a named volume there, and they survive `docker rm`:
+
+```bash
+docker run --rm -v fares-journeys:/data fares save "Catalunya" "Terrassa" --date 2026-11-03
+docker run --rm -v fares-journeys:/data fares save "Terrassa" "Catalunya" --date 2026-11-03
+docker run --rm -v fares-journeys:/data fares spending --month 2026-11
+```
+
+Each container is removed after it runs, but the last command still shows `Total spending: 9.00 €`.
 
 
 ### Custom fares with Docker
@@ -359,7 +388,7 @@ The initial version of Public Transport Fares uses a simplified simulation of Ba
 - Actual routes, distances, stops, transfers, and travel times are not considered.
 - Prices do not change based on time or day.
 - Stations and fares are defined directly in the code.
-- The application does not yet store journeys, calculate monthly spending, or access live transport information.
+- The application does not access live transport information.
 - The application runs exclusively through the command line.
 
 These assumptions are intentional simplifications for the first version. Additional functionality will be introduced incrementally through the Product Backlog.

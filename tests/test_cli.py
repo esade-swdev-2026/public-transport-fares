@@ -348,3 +348,74 @@ def test_calculate_rejects_invalid_fares_file(
     assert result.exit_code != 0
     assert "Error:" in result.stderr
     assert "Traceback" not in result.stderr
+
+
+def test_save_then_spending_shows_the_month_total(tmp_path: Path) -> None:
+    journal = str(tmp_path / "journeys.json")
+    for origin, destination in [("Catalunya", "Terrassa"), ("Terrassa", "Catalunya")]:
+        result = runner.invoke(
+            app, ["save", origin, destination, "--date", "2026-11-03", "--journal", journal]
+        )
+        assert result.exit_code == 0
+
+    result = runner.invoke(app, ["spending", "--month", "2026-11", "--journal", journal])
+
+    assert result.exit_code == 0
+    assert "Journeys in 2026-11: 2" in result.stdout
+    assert "Total spending: 9.00 €" in result.stdout
+
+
+def test_save_applies_passenger_discount(tmp_path: Path) -> None:
+    journal = str(tmp_path / "journeys.json")
+
+    result = runner.invoke(
+        app,
+        ["save", "Catalunya", "Terrassa", "--passenger", "student"]
+        + ["--date", "2026-11-03", "--journal", journal],
+    )
+
+    assert result.exit_code == 0
+    assert "3.60 €" in result.stdout
+
+
+def test_spending_ignores_other_months(tmp_path: Path) -> None:
+    journal = str(tmp_path / "journeys.json")
+    runner.invoke(
+        app, ["save", "Catalunya", "Terrassa", "--date", "2026-10-31", "--journal", journal]
+    )
+
+    result = runner.invoke(app, ["spending", "--month", "2026-11", "--journal", journal])
+
+    assert "Journeys in 2026-11: 0" in result.stdout
+    assert "Total spending: 0.00 €" in result.stdout
+
+
+def test_save_rejects_invalid_date(tmp_path: Path) -> None:
+    journal = str(tmp_path / "journeys.json")
+
+    result = runner.invoke(
+        app, ["save", "Catalunya", "Terrassa", "--date", "03/11/2026", "--journal", journal]
+    )
+
+    assert result.exit_code == 1
+    assert "Invalid date" in result.stderr
+
+
+def test_spending_rejects_invalid_month(tmp_path: Path) -> None:
+    journal = str(tmp_path / "journeys.json")
+
+    result = runner.invoke(app, ["spending", "--month", "november", "--journal", journal])
+
+    assert result.exit_code == 1
+    assert "Invalid month" in result.stderr
+
+
+def test_spending_rejects_broken_journeys_file(tmp_path: Path) -> None:
+    journal = tmp_path / "journeys.json"
+    journal.write_text("not json", encoding="utf-8")
+
+    result = runner.invoke(app, ["spending", "--journal", str(journal)])
+
+    assert result.exit_code == 1
+    assert "Invalid journeys file" in result.stderr
+    assert "Traceback" not in result.stderr
