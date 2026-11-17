@@ -214,6 +214,30 @@ uv run fares spending --month 2026-11
 
 Use `--journal PATH` (or the `FARES_JOURNAL` environment variable) to keep the journeys in another file.
 
+
+### Peak-Time Surcharge
+
+Single tickets cost 20% more at peak time:
+
+- 07:00 to 09:30
+- 17:00 to 19:30
+
+The end time is off-peak (09:30 itself is not peak time). 10-trip and monthly tickets never have a surcharge.
+
+Use `--time HH:MM` with `calculate` or `save`. If `--time` is omitted, the current time is used.
+
+```bash
+uv run fares calculate "Catalunya" "Terrassa" --time 08:15
+```
+
+Output:
+
+```text
+Fare from Catalunya to Terrassa for passenger type adult and ticket type single: 5.40 €
+```
+
+The surcharge is applied before the passenger discount, so a child at 08:15 pays 2.70 €. An invalid time, such as `--time 25:99`, prints an error and exits with a non-zero exit code.
+
 ### Unknown Station Errors
 
 Station names are case-insensitive, and extra spaces at the beginning or end are ignored.
@@ -386,7 +410,7 @@ The initial version of Public Transport Fares uses a simplified simulation of Ba
 - Fare zones are calculated using the absolute difference between zone numbers plus one.
 - Journeys within the same zone count as one zone, and fares are identical in both directions.
 - Actual routes, distances, stops, transfers, and travel times are not considered.
-- Prices do not change based on time or day.
+- Single-ticket prices include a 20% surcharge at peak time; prices do not change by day of the week.
 - Stations and fares are defined directly in the code.
 - The application does not access live transport information.
 - The application runs exclusively through the command line.

@@ -1,3 +1,4 @@
+from datetime import time
 from pathlib import Path
 
 import pytest
@@ -10,6 +11,7 @@ from public_transport_fares.journeys import (
     load_journeys,
     parse_day,
     parse_month,
+    parse_time,
     save_journeys,
     total_spending,
 )
@@ -84,3 +86,13 @@ def test_saved_journeys_can_be_loaded_again(tmp_path: Path) -> None:
     save_journeys(path, [NOVEMBER_TRIP])
 
     assert load_journeys(path) == [NOVEMBER_TRIP]
+
+
+def test_parse_time_reads_hours_and_minutes() -> None:
+    assert parse_time("08:15") == time(8, 15)
+
+
+@pytest.mark.parametrize("value", ["25:00", "8h15", "morning"])
+def test_parse_time_rejects_invalid_times(value: str) -> None:
+    with pytest.raises(ValueError, match="Invalid time"):
+        parse_time(value)
