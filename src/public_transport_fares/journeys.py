@@ -10,6 +10,10 @@ class Journey:
     origin: str
     destination: str
     price: float
+    start_time: str | None = None
+
+
+TRANSFER_WINDOW_MINUTES = 75
 
 
 def parse_month(month: str) -> str:
@@ -47,6 +51,7 @@ def journeys_from_json(content: str) -> list[Journey]:
                 origin=str(item["origin"]),
                 destination=str(item["destination"]),
                 price=float(item["price"]),
+                start_time=item.get("start_time"),
             )
             for item in data
         ]
@@ -80,3 +85,26 @@ def save_journeys(path: Path, journeys: list[Journey]) -> None:
     """Write journeys to a file, creating its folder if needed."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(journeys_to_json(journeys) + "\n", encoding="utf-8")
+
+
+def minutes_between(earlier: time, later: time) -> int:
+    """Return how many minutes pass from one time to a later time on the same day."""
+    return (later.hour * 60 + later.minute) - (earlier.hour * 60 + earlier.minute)
+
+
+def is_free_transfer(previous: Journey | None, new_journey: Journey) -> bool:
+    """Return True if the new journey continues the previous one within the transfer window."""
+    if previous is None or previous.start_time is None or new_journey.start_time is None:
+        return False
+
+    if previous.price == 0 or previous.day != new_journey.day:
+        return False
+
+    if new_journey.origin.strip().lower() != previous.destination.strip().lower():
+        return False
+
+    if new_journey.destination.strip().lower() == previous.origin.strip().lower():
+        return False
+
+    minutes = minutes_between(parse_time(previous.start_time), parse_time(new_journey.start_time))
+    return 0 <= minutes <= TRANSFER_WINDOW_MINUTES

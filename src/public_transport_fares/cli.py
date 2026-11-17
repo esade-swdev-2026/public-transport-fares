@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import date, datetime, time
 from pathlib import Path
 from typing import Annotated, NoReturn
@@ -16,6 +17,7 @@ from public_transport_fares.fares import (
 )
 from public_transport_fares.journeys import (
     Journey,
+    is_free_transfer,
     journeys_in_month,
     load_journeys,
     parse_day,
@@ -238,14 +240,27 @@ def save(
     single_price = calculate_fare(origin_zone, destination_zone, config)
     single_price = apply_peak_surcharge(single_price, "single", chosen_time)
     price = round(apply_passenger_discount(single_price, passenger, config), 2)
-    journey = Journey(day=journey_day, origin=origin, destination=destination, price=price)
+    journey = Journey(
+        day=journey_day,
+        origin=origin,
+        destination=destination,
+        price=price,
+        start_time=chosen_time.strftime("%H:%M"),
+    )
+
+    saved_journeys = get_journeys(journal)
+    previous = saved_journeys[-1] if saved_journeys else None
+    free_transfer = is_free_transfer(previous, journey)
+    if free_transfer:
+        journey = replace(journey, price=0.0)
 
     try:
-        save_journeys(journal, [*get_journeys(journal), journey])
+        save_journeys(journal, [*saved_journeys, journey])
     except OSError as error:
         stop_with_error(f"could not save journeys to {journal}: {error}")
 
-    typer.echo(f"Saved {journey.day}: {origin} -> {destination}, {price:.2f} €")
+    note = " (free transfer)" if free_transfer else ""
+    typer.echo(f"Saved {journey.day}: {origin} -> {destination}, {journey.price:.2f} €{note}")
 
 
 @app.command()

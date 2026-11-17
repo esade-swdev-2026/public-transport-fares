@@ -466,3 +466,29 @@ def test_save_adds_peak_surcharge_at_peak_time(tmp_path: Path) -> None:
 
     assert result.exit_code == 0
     assert "5.40 €" in result.stdout
+
+
+def test_save_makes_a_connecting_journey_a_free_transfer(tmp_path: Path) -> None:
+    journal = str(tmp_path / "journeys.json")
+    legs = [
+        ("Catalunya", "Sant Cugat", "12:00"),
+        ("Sant Cugat", "Terrassa", "12:30"),
+        ("Terrassa", "Rubi", "12:50"),
+    ]
+    outputs = []
+    for origin, destination, start in legs:
+        result = runner.invoke(
+            app,
+            ["save", origin, destination, "--time", start]
+            + ["--date", "2026-11-17", "--journal", journal],
+        )
+        assert result.exit_code == 0
+        outputs.append(result.stdout)
+
+    assert "3.50 €" in outputs[0]
+    assert "0.00 € (free transfer)" in outputs[1]
+    assert "3.50 €" in outputs[2]
+
+    result = runner.invoke(app, ["spending", "--month", "2026-11", "--journal", journal])
+
+    assert "Total spending: 7.00 €" in result.stdout
