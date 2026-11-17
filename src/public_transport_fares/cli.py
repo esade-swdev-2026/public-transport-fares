@@ -1,5 +1,6 @@
+from datetime import date
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, NoReturn
 
 import typer
 
@@ -12,9 +13,34 @@ from public_transport_fares.fares import (
     is_valid_ticket_type,
     recommend_ticket,
 )
+from public_transport_fares.journeys import (
+    Journey,
+    journeys_in_month,
+    load_journeys,
+    parse_day,
+    parse_month,
+    save_journeys,
+    total_spending,
+)
 from public_transport_fares.stations import get_station_zone, list_stations
 
 app = typer.Typer(help="Calculate public transport fares between stations.")
+
+DEFAULT_JOURNAL = Path("journeys.json")
+
+
+def stop_with_error(message: str) -> NoReturn:
+    """Show an error message and exit with a non-zero code."""
+    typer.echo(f"Error: {message}", err=True)
+    raise typer.Exit(code=1)
+
+
+def get_journeys(path: Path) -> list[Journey]:
+    """Load saved journeys and handle a broken or unreadable file."""
+    try:
+        return load_journeys(path)
+    except (OSError, ValueError) as error:
+        stop_with_error(str(error))
 
 
 def get_config(path: Path | None) -> FareConfig:
@@ -143,4 +169,77 @@ def recommend(
         f"Passenger type: {passenger}\n"
         f"Journeys per month: {journeys}\n"
         f"Total cost: {total_price:.2f} €"
+    )
+
+
+@app.command()
+def save(
+    origin: str,
+    destination: str,
+    passenger: Annotated[
+        str,
+        typer.Option(help="Passenger type: adult, child, student or senior."),
+    ] = "adult",
+    day: Annotated[
+        str | None,
+        typer.Option("--date", help="Date of the journey, YYYY-MM-DD. Default: today."),
+    ] = None,
+    journal: Annotated[
+        Path,
+        typer.Option(envvar="FARES_JOURNAL", help="File where your journeys are saved."),
+    ] = DEFAULT_JOURNAL,
+    fares: Annotated[
+        Path | None,
+        typer.Option("--fares", help="Path to a custom fares JSON file."),
+    ] = None,
+) -> None:
+    """Save a journey you made, at its single-ticket price."""
+    config = get_config(fares)
+    check_passenger_type(passenger, config)
+    origin_zone, destination_zone = get_journey_zones(origin, destination)
+
+    try:
+        journey_day = parse_day(day) if day else date.today().isoformat()
+    except ValueError as error:
+        stop_with_error(str(error))
+
+    single_price = calculate_fare(origin_zone, destination_zone, config)
+    price = round(apply_passenger_discount(single_price, passenger, config), 2)
+    journey = Journey(day=journey_day, origin=origin, destination=destination, price=price)
+
+    try:
+        save_journeys(journal, [*get_journeys(journal), journey])
+    except OSError as error:
+        stop_with_error(f"could not save journeys to {journal}: {error}")
+
+    typer.echo(f"Saved {journey.day}: {origin} -> {destination}, {price:.2f} €")
+
+
+@app.command()
+def spending(
+    month: Annotated[
+        str | None,
+        typer.Option(help="Month to add up, YYYY-MM. Default: this month."),
+    ] = None,
+    journal: Annotated[
+        Path,
+        typer.Option(envvar="FARES_JOURNAL", help="File where your journeys are saved."),
+    ] = DEFAULT_JOURNAL,
+) -> None:
+    """List your saved journeys for a month and their total cost."""
+    try:
+        chosen_month = parse_month(month) if month else date.today().strftime("%Y-%m")
+    except ValueError as error:
+        stop_with_error(str(error))
+
+    journeys = journeys_in_month(get_journeys(journal), chosen_month)
+
+    for journey in journeys:
+        typer.echo(
+            f"{journey.day}  {journey.origin} -> {journey.destination}  {journey.price:.2f} €"
+        )
+
+    typer.echo(
+        f"Journeys in {chosen_month}: {len(journeys)}\n"
+        f"Total spending: {total_spending(journeys):.2f} €"
     )

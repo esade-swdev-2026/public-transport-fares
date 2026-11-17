@@ -16,6 +16,9 @@ RUN uv sync --locked --no-dev
 
 # Run the application as a non-root user
 RUN useradd --create-home app
+# Saved journeys live in /data: mount a volume there to keep them
+RUN mkdir /data && chown app /data
+ENV FARES_JOURNAL=/data/journeys.json
 USER app
 
 ENV PATH="/app/.venv/bin:$PATH"
