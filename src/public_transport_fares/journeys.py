@@ -1,6 +1,6 @@
 import json
 from dataclasses import asdict, dataclass
-from datetime import date
+from datetime import date, datetime, time
 from pathlib import Path
 
 
@@ -27,6 +27,14 @@ def parse_day(day: str) -> str:
         return date.fromisoformat(day).isoformat()
     except ValueError:
         raise ValueError(f"Invalid date '{day}'. Use YYYY-MM-DD, for example 2026-11-17.") from None
+
+
+def parse_time(value: str) -> time:
+    """Return the time given as HH:MM, or raise ValueError if it is not one."""
+    try:
+        return datetime.strptime(value, "%H:%M").time()
+    except ValueError:
+        raise ValueError(f"Invalid time '{value}'. Use HH:MM, for example 08:15.") from None
 
 
 def journeys_from_json(content: str) -> list[Journey]:

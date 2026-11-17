@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, time
 from pathlib import Path
 from typing import Annotated, NoReturn
 
@@ -7,6 +7,7 @@ import typer
 from public_transport_fares.config import FareConfig, load_fare_config
 from public_transport_fares.fares import (
     apply_passenger_discount,
+    apply_peak_surcharge,
     calculate_fare,
     calculate_ticket_price,
     is_valid_passenger_type,
@@ -19,6 +20,7 @@ from public_transport_fares.journeys import (
     load_journeys,
     parse_day,
     parse_month,
+    parse_time,
     save_journeys,
     total_spending,
 )
@@ -40,6 +42,17 @@ def get_journeys(path: Path) -> list[Journey]:
     try:
         return load_journeys(path)
     except (OSError, ValueError) as error:
+        stop_with_error(str(error))
+
+
+def get_journey_time(value: str | None) -> time:
+    """Return the time given as HH:MM, or the current time if none was given."""
+    if value is None:
+        return datetime.now().time()
+
+    try:
+        return parse_time(value)
+    except ValueError as error:
         stop_with_error(str(error))
 
 
@@ -85,6 +98,14 @@ def calculate(
     destination: str,
     passenger: str = "adult",
     ticket: str = "single",
+    journey_time: Annotated[
+        str | None,
+        typer.Option(
+            "--time",
+            envvar="FARES_TIME",
+            help="Time of the journey, HH:MM. Default: now.",
+        ),
+    ] = None,
     fares: Annotated[
         Path | None,
         typer.Option("--fares", help="Path to a custom fares JSON file."),
@@ -92,6 +113,7 @@ def calculate(
 ) -> None:
     """Calculate the fare between two stations."""
     config = get_config(fares)
+    chosen_time = get_journey_time(journey_time)
 
     check_passenger_type(passenger, config)
 
@@ -106,6 +128,7 @@ def calculate(
 
     base_price = calculate_fare(origin_zone, destination_zone, config)
     ticket_price = calculate_ticket_price(base_price, ticket)
+    ticket_price = apply_peak_surcharge(ticket_price, ticket, chosen_time)
     price = apply_passenger_discount(ticket_price, passenger, config)
 
     typer.echo(
@@ -184,6 +207,14 @@ def save(
         str | None,
         typer.Option("--date", help="Date of the journey, YYYY-MM-DD. Default: today."),
     ] = None,
+    journey_time: Annotated[
+        str | None,
+        typer.Option(
+            "--time",
+            envvar="FARES_TIME",
+            help="Time of the journey, HH:MM. Default: now.",
+        ),
+    ] = None,
     journal: Annotated[
         Path,
         typer.Option(envvar="FARES_JOURNAL", help="File where your journeys are saved."),
@@ -203,7 +234,9 @@ def save(
     except ValueError as error:
         stop_with_error(str(error))
 
+    chosen_time = get_journey_time(journey_time)
     single_price = calculate_fare(origin_zone, destination_zone, config)
+    single_price = apply_peak_surcharge(single_price, "single", chosen_time)
     price = round(apply_passenger_discount(single_price, passenger, config), 2)
     journey = Journey(day=journey_day, origin=origin, destination=destination, price=price)
 

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import time
 
 from public_transport_fares.config import FareConfig
 
@@ -20,6 +21,12 @@ TEN_TRIP_DISCOUNT = 0.20
 MONTHLY_BASE_PRICE = 40.00
 SINGLE_BASE_PRICE = 2.50
 TICKET_TYPES = ("single", "10-trip", "monthly")
+
+PEAK_SURCHARGE = 0.20
+PEAK_PERIODS = (
+    (time(7, 0), time(9, 30)),
+    (time(17, 0), time(19, 30)),
+)
 
 
 def price_for_zones(
@@ -113,3 +120,16 @@ def recommend_ticket(single_price: float, journeys: int) -> Recommendation:
     cheapest_ticket = min(options, key=lambda ticket: options[ticket])
 
     return Recommendation(ticket_type=cheapest_ticket, total_price=options[cheapest_ticket])
+
+
+def is_peak_time(journey_time: time) -> bool:
+    """Return True if the time falls inside a peak period (the end time is off-peak)."""
+    return any(start <= journey_time < end for start, end in PEAK_PERIODS)
+
+
+def apply_peak_surcharge(price: float, ticket_type: str, journey_time: time) -> float:
+    """Add the peak-time surcharge to single tickets; other tickets keep their price."""
+    if ticket_type != "single" or not is_peak_time(journey_time):
+        return price
+
+    return price * (1 + PEAK_SURCHARGE)

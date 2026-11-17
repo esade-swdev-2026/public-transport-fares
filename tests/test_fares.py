@@ -1,4 +1,5 @@
 from dataclasses import FrozenInstanceError
+from datetime import time
 
 import pytest
 
@@ -6,8 +7,10 @@ from public_transport_fares.config import FareConfig
 from public_transport_fares.fares import (
     Recommendation,
     apply_passenger_discount,
+    apply_peak_surcharge,
     calculate_fare,
     calculate_ticket_price,
+    is_peak_time,
     is_valid_passenger_type,
     price_for_zones,
     recommend_ticket,
@@ -280,3 +283,32 @@ def test_default_and_custom_fares_are_different(
     assert default_price == 4.50
     assert custom_price == 5.00
     assert default_price != custom_price
+
+
+@pytest.mark.parametrize(
+    ("journey_time", "expected"),
+    [
+        (time(6, 59), False),
+        (time(7, 0), True),
+        (time(9, 29), True),
+        (time(9, 30), False),
+        (time(12, 0), False),
+        (time(17, 0), True),
+        (time(19, 30), False),
+    ],
+)
+def test_is_peak_time(journey_time: time, expected: bool) -> None:
+    assert is_peak_time(journey_time) == expected
+
+
+def test_peak_surcharge_is_added_to_single_ticket_at_peak_time() -> None:
+    assert apply_peak_surcharge(4.50, "single", time(8, 15)) == pytest.approx(5.40)
+
+
+def test_no_peak_surcharge_off_peak() -> None:
+    assert apply_peak_surcharge(4.50, "single", time(12, 0)) == 4.50
+
+
+@pytest.mark.parametrize("ticket_type", ["10-trip", "monthly"])
+def test_no_peak_surcharge_on_passes(ticket_type: str) -> None:
+    assert apply_peak_surcharge(36.00, ticket_type, time(8, 15)) == 36.00

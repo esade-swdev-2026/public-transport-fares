@@ -419,3 +419,50 @@ def test_spending_rejects_broken_journeys_file(tmp_path: Path) -> None:
     assert result.exit_code == 1
     assert "Invalid journeys file" in result.stderr
     assert "Traceback" not in result.stderr
+
+
+def test_calculate_adds_peak_surcharge_at_peak_time() -> None:
+    result = runner.invoke(app, ["calculate", "Catalunya", "Terrassa", "--time", "08:15"])
+
+    assert result.exit_code == 0
+    assert "5.40 €" in result.stdout
+
+
+def test_calculate_combines_peak_surcharge_and_passenger_discount() -> None:
+    result = runner.invoke(
+        app,
+        ["calculate", "Catalunya", "Terrassa", "--time", "08:15", "--passenger", "child"],
+    )
+
+    assert result.exit_code == 0
+    assert "2.70 €" in result.stdout
+
+
+def test_calculate_has_no_peak_surcharge_on_monthly_ticket() -> None:
+    result = runner.invoke(
+        app,
+        ["calculate", "Catalunya", "Terrassa", "--time", "08:15", "--ticket", "monthly"],
+    )
+
+    assert result.exit_code == 0
+    assert "72.00 €" in result.stdout
+
+
+def test_calculate_rejects_invalid_time() -> None:
+    result = runner.invoke(app, ["calculate", "Catalunya", "Terrassa", "--time", "25:99"])
+
+    assert result.exit_code == 1
+    assert "Invalid time" in result.stderr
+    assert "Traceback" not in result.stderr
+
+
+def test_save_adds_peak_surcharge_at_peak_time(tmp_path: Path) -> None:
+    journal = tmp_path / "journeys.json"
+
+    result = runner.invoke(
+        app,
+        ["save", "Catalunya", "Terrassa", "--time", "18:00", "--journal", str(journal)],
+    )
+
+    assert result.exit_code == 0
+    assert "5.40 €" in result.stdout
