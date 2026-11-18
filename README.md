@@ -238,6 +238,34 @@ Fare from Catalunya to Terrassa for passenger type adult and ticket type single:
 
 The surcharge is applied before the passenger discount, so a child at 08:15 pays 2.70 €. An invalid time, such as `--time 25:99`, prints an error and exits with a non-zero exit code.
 
+
+### Free Transfers
+
+When you save a journey with `save`, it is free (0.00 €) if it continues your last saved journey:
+
+- it is on the same day and starts at most 75 minutes after the last saved journey started,
+- it starts at the station where the last journey ended,
+- it does not go back to the station where the last journey started (a return trip is paid), and
+- the last journey was paid (only one free transfer in a row).
+
+The 75-minute window follows the transfer time of Barcelona's integrated single-zone tickets.
+
+```bash
+uv run fares save "Catalunya" "Sant Cugat" --time 12:00
+uv run fares save "Sant Cugat" "Terrassa" --time 12:30
+```
+
+Output:
+
+```text
+Saved 2026-11-17: Catalunya -> Sant Cugat, 3.50 €
+Saved 2026-11-17: Sant Cugat -> Terrassa, 0.00 € (free transfer)
+```
+
+Each saved journey now records its start time. Journeys saved before this change have no start time and are never counted as transfers.
+
+
+
 ### Unknown Station Errors
 
 Station names are case-insensitive, and extra spaces at the beginning or end are ignored.
