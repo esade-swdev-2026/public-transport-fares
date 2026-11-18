@@ -155,6 +155,11 @@ def recommend(
         "--journeys",
         help="Expected number of journeys per month.",
     ),
+    peak_journeys: int = typer.Option(
+        0,
+        "--peak-journeys",
+        help="Number of journeys expected at peak times.",
+    ),
     passenger: str = typer.Option(
         "adult",
         "--passenger",
@@ -181,7 +186,10 @@ def recommend(
 
     single_price = calculate_fare(origin_zone, destination_zone, config)
 
-    recommendation = recommend_ticket(single_price, journeys)
+    try:
+        recommendation = recommend_ticket(single_price, journeys, peak_journeys=peak_journeys)
+    except ValueError as error:
+        stop_with_error(str(error))
 
     total_price = apply_passenger_discount(
         recommendation.total_price,

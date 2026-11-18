@@ -92,17 +92,22 @@ def is_valid_ticket_type(ticket_type: str) -> bool:
     return ticket_type in TICKET_TYPES
 
 
-def recommend_ticket(single_price: float, journeys: int) -> Recommendation:
+def recommend_ticket(single_price: float, journeys: int, peak_journeys: int = 0) -> Recommendation:
     if single_price < 0:
         raise ValueError("Single ticket price cannot be negative")
 
     if journeys < 0:
         raise ValueError("Number of journeys cannot be negative.")
 
+    if not 0 <= peak_journeys <= journeys:
+        raise ValueError("Peak journeys must be between 0 and the total number of journeys.")
+
     if journeys == 0:
         return Recommendation(ticket_type="single", total_price=0.0)
 
-    single_total = single_price * journeys
+    off_peak_journeys = journeys - peak_journeys
+    peak_single_price = single_price * (1 + PEAK_SURCHARGE)
+    single_total = single_price * off_peak_journeys + peak_single_price * peak_journeys
 
     ten_trip_price = calculate_ticket_price(single_price, "10-trip")
     ten_trip_packs = (journeys + TEN_TRIP_JOURNEYS - 1) // TEN_TRIP_JOURNEYS
