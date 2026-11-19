@@ -25,13 +25,13 @@ uv run fares --help
 Calculate a fare using the default adult passenger type:
 
 ```bash
-uv run fares calculate "Catalunya" "Terrassa"
+uv run fares calculate "Catalunya" "Terrassa" --time 12:00
 ```
 
 Calculate a fare for a different passenger type:
 
 ```bash
-uv run fares calculate "Catalunya" "Terrassa" --passenger child
+uv run fares calculate "Catalunya" "Terrassa" --passenger child --time 12:00
 ```
 
 List all stations and their fare zones:
@@ -268,8 +268,8 @@ When you save a journey with `save`, it is free (0.00 €) if it continues your 
 The 75-minute window follows the transfer time of Barcelona's integrated single-zone tickets.
 
 ```bash
-uv run fares save "Catalunya" "Sant Cugat" --time 12:00
-uv run fares save "Sant Cugat" "Terrassa" --time 12:30
+uv run fares save "Catalunya" "Sant Cugat" --date 2026-11-17 --time 12:00
+uv run fares save "Sant Cugat" "Terrassa" --date 2026-11-17 --time 12:30
 ```
 
 Output:
@@ -306,6 +306,25 @@ The application exits with a non-zero exit code and does not display a Python tr
 
 ## Run with Docker
 
+### Run the published image
+
+After the `v1.0` image is published, download it from GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/esade-swdev-2026/public-transport-fares:v1.0
+```
+
+Calculate a fare:
+
+```bash
+docker run --rm ghcr.io/esade-swdev-2026/public-transport-fares:v1.0 \
+  calculate "Catalunya" "Terrassa" --time 12:00
+```
+
+Expected fare: 4.50 €.
+
+### Build the image locally
+
 Build the Docker image:
 
 ```bash id="l1jtc8"
@@ -321,7 +340,7 @@ docker run --rm fares --help
 Calculate a fare:
 
 ```bash id="jh67c8"
-docker run --rm fares calculate "Catalunya" "Terrassa"
+docker run --rm fares calculate "Catalunya" "Terrassa" --time 12:00
 ```
 
 Recommend a ticket:
@@ -336,16 +355,13 @@ Verify that the container runs as a non-root user:
 docker run --rm --entrypoint id fares
 ```
 
-Fare prices and station data are currently included in the application.
-External JSON configuration will be integrated separately.
-
 ### Saved journeys with Docker
 
 Journeys are saved in `/data` inside the container. Mount a named volume there, and they survive `docker rm`:
 
 ```bash
-docker run --rm -v fares-journeys:/data fares save "Catalunya" "Terrassa" --date 2026-11-03
-docker run --rm -v fares-journeys:/data fares save "Terrassa" "Catalunya" --date 2026-11-03
+docker run --rm -v fares-journeys:/data fares save "Catalunya" "Terrassa" --date 2026-11-03 --time 12:00
+docker run --rm -v fares-journeys:/data fares save "Terrassa" "Catalunya" --date 2026-11-03 --time 12:00
 docker run --rm -v fares-journeys:/data fares spending --month 2026-11
 ```
 
@@ -366,7 +382,7 @@ docker build -t fares .
 Calculate a fare with the default configuration:
 
 ```bash
-docker run --rm fares calculate "Catalunya" "Terrassa"
+docker run --rm fares calculate "Catalunya" "Terrassa" --time 12:00
 ```
 
 Expected fare: 4.50 €.
@@ -377,7 +393,7 @@ Use the external configuration file:
 docker run --rm \
   --mount type=bind,source="$(pwd)/my-fares.json",target=/config/fares.json,readonly \
   fares calculate "Catalunya" "Terrassa" \
-  --fares /config/fares.json
+  --fares /config/fares.json --time 12:00
 ```
 
 Expected fare: 5.00 €.
@@ -454,9 +470,9 @@ The initial version of Public Transport Fares uses a simplified simulation of Ba
 - Single-ticket prices are €2.50, €3.50, and €4.50 for one, two, and three zones respectively. The prices of 10-trip and monthly tickets are calculated from these base fares.
 - Fare zones are calculated using the absolute difference between zone numbers plus one.
 - Journeys within the same zone count as one zone, and fares are identical in both directions.
-- Actual routes, distances, stops, transfers, and travel times are not considered.
+- Fare calculations use zones. The application uses saved journeys to check for free transfers.
 - Single-ticket prices include a 20% surcharge at peak time; prices do not change by day of the week.
-- Stations and fares are defined directly in the code.
+- Stations are defined in the code. Default fare prices and passenger discounts are included in the application and can be overridden with a JSON file.
 - The application does not access live transport information.
 - The application runs exclusively through the command line.
 
