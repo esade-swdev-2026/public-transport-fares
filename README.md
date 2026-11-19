@@ -134,9 +134,9 @@ The application compares the total cost of single tickets, 10-trip tickets, and 
 
 | Ticket type | Calculation |
 |---|---|
-|  `single`   |   Single ticket price multiplied by the number of journeys |
-|  `10-trip`  |   Price of the 10-trip passes needed to cover all journeys |
-|  `monthly`  |   Fixed monthly price based on the number of fare zones |
+| `single` | Total price of single tickets, including a 20% surcharge for journeys at peak times |
+| `10-trip` | Price of the 10-trip passes needed to cover all journeys |
+| `monthly` | Fixed monthly price based on the number of fare zones |
 
 Examples
 Recommend a ticket for 5 journeys within one fare zone:
@@ -195,7 +195,24 @@ Total cost: 57.60 €
 
 If `--passenger` is omitted, the recommendation uses adult fares. Unknown passenger types and unknown station names are handled in the same way as in the calculate command.
 
-The passenger discount is applied to every ticket type before they are compared. The recommendation compares each ticket type separately and does not combine different ticket types. If two options have the same cost, the application selects the first one in the order: single, 10-trip, monthly.
+The passenger discount is applied to the total cost of the recommended ticket. The recommendation compares the cost of using each ticket type for all journeys. If two options have the same cost, the application selects the first one in the order: single, 10-trip, monthly.
+
+Use `--peak-journeys` to specify how many of your monthly journeys will be at peak times. The value must be an integer between 0 and the total number of journeys. If `--peak-journeys` is omitted, it defaults to 0. Values outside that range display an error message and exit with a non-zero status code.
+
+Recommend a ticket for 7 peak-time journeys within one fare zone:
+```bash
+uv run fares recommend "Catalunya" "Sagrada Familia" --journeys 7 --peak-journeys 7
+```
+
+Expected output:
+```text
+Recommended ticket: 10-trip
+Passenger type: adult
+Journeys per month: 7
+Total cost: 20.00 €
+```
+
+Seven single tickets at peak times would cost €21.00.
 
 ### Track Your Monthly Spending
 

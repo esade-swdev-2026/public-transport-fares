@@ -492,3 +492,76 @@ def test_save_makes_a_connecting_journey_a_free_transfer(tmp_path: Path) -> None
     result = runner.invoke(app, ["spending", "--month", "2026-11", "--journal", journal])
 
     assert "Total spending: 7.00 €" in result.stdout
+
+
+def test_save_rejects_invalid_start_time_in_journal(tmp_path: Path) -> None:
+    journal = tmp_path / "journeys.json"
+    original = (
+        '[{"day": "2026-11-17", "origin": "Catalunya", '
+        '"destination": "Sant Cugat", "price": 3.50, "start_time": "25:99"}]'
+    )
+    journal.write_text(original, encoding="utf-8")
+
+    result = runner.invoke(
+        app,
+        [
+            "save",
+            "Sant Cugat",
+            "Terrassa",
+            "--date",
+            "2026-11-17",
+            "--time",
+            "12:30",
+            "--journal",
+            str(journal),
+        ],
+    )
+
+    assert result.exit_code == 1
+    assert "Invalid journeys file" in result.stderr
+    assert "Invalid time '25:99'" in result.stderr
+    assert journal.read_text(encoding="utf-8") == original
+
+
+@pytest.mark.parametrize(
+    ("peak_journeys", "ticket", "total"),
+    [
+        (0, "single", "17.50"),
+        (2, "single", "18.50"),
+        (7, "10-trip", "20.00"),
+    ],
+)
+def test_recommend_accounts_for_peak_journeys(peak_journeys: int, ticket: str, total: str) -> None:
+    result = runner.invoke(
+        app,
+        [
+            "recommend",
+            "Catalunya",
+            "Sagrada Familia",
+            "--journeys",
+            "7",
+            f"--peak-journeys={peak_journeys}",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert f"Recommended ticket: {ticket}" in result.stdout
+    assert f"Total cost: {total} €" in result.stdout
+
+
+@pytest.mark.parametrize("peak_journeys", [-1, 8])
+def test_recommend_rejects_peak_journeys_outside_range(peak_journeys: int) -> None:
+    result = runner.invoke(
+        app,
+        [
+            "recommend",
+            "Catalunya",
+            "Sagrada Familia",
+            "--journeys",
+            "7",
+            f"--peak-journeys={peak_journeys}",
+        ],
+    )
+
+    assert result.exit_code == 1
+    assert "Peak journeys must be between 0 and the total number of journeys." in result.stderr

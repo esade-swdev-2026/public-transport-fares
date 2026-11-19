@@ -45,17 +45,27 @@ def journeys_from_json(content: str) -> list[Journey]:
     """Convert the text of a journeys file into a list of journeys."""
     try:
         data = json.loads(content)
-        return [
-            Journey(
-                day=str(item["day"]),
-                origin=str(item["origin"]),
-                destination=str(item["destination"]),
-                price=float(item["price"]),
-                start_time=item.get("start_time"),
+        journeys = []
+
+        for item in data:
+            start_time = item.get("start_time")
+            if start_time is not None:
+                if not isinstance(start_time, str):
+                    raise ValueError("Journey start time must be a string in HH:MM format.")
+                parse_time(start_time)
+
+            journeys.append(
+                Journey(
+                    day=str(item["day"]),
+                    origin=str(item["origin"]),
+                    destination=str(item["destination"]),
+                    price=float(item["price"]),
+                    start_time=start_time,
+                )
             )
-            for item in data
-        ]
-    except (json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
+
+        return journeys
+    except (json.JSONDecodeError, AttributeError, KeyError, TypeError, ValueError) as error:
         raise ValueError(f"Invalid journeys file: {error}") from error
 
 
