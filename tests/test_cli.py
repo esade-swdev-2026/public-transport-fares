@@ -565,3 +565,22 @@ def test_recommend_rejects_peak_journeys_outside_range(peak_journeys: int) -> No
 
     assert result.exit_code == 1
     assert "Peak journeys must be between 0 and the total number of journeys." in result.stderr
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ["calculate", "Catalunya", "Terrassa", "--ticket", "weekly"],
+        ["calculate", "Catalunya", "Terrassa", "--passenger", "dog"],
+        ["calculate", "Madrid", "Terrassa"],
+        ["recommend", "Catalunya", "Terrassa", "--journeys", "0"],
+        ["spending", "--month", "november"],
+    ],
+)
+def test_every_error_is_one_clear_line_on_stderr(args: list[str]) -> None:
+    result = runner.invoke(app, args)
+
+    assert result.exit_code == 1
+    assert result.stderr.startswith("Error: ")
+    assert result.stdout == ""
+    assert "Traceback" not in result.output
