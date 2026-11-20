@@ -24,6 +24,7 @@ from public_transport_fares.journeys import (
     parse_day,
     parse_month,
     parse_time,
+    remaining_budget,
     save_journeys,
     total_spending,
 )
@@ -267,12 +268,19 @@ def spending(
         Path,
         typer.Option(envvar="FARES_JOURNAL", help="File where your journeys are saved."),
     ] = DEFAULT_JOURNAL,
+    budget: Annotated[
+        float | None,
+        typer.Option(help="Monthly budget in euros. Tells you if you went over it."),
+    ] = None,
 ) -> None:
     """List your saved journeys for a month and their total cost."""
     try:
         chosen_month = parse_month(month) if month else date.today().strftime("%Y-%m")
     except ValueError as error:
         stop_with_error(str(error))
+
+    if budget is not None and budget <= 0:
+        stop_with_error("budget must be greater than zero.")
 
     journeys = journeys_in_month(get_journeys(journal), chosen_month)
 
@@ -281,7 +289,12 @@ def spending(
             f"{journey.day}  {journey.origin} -> {journey.destination}  {journey.price:.2f} €"
         )
 
-    typer.echo(
-        f"Journeys in {chosen_month}: {len(journeys)}\n"
-        f"Total spending: {total_spending(journeys):.2f} €"
-    )
+    spent = total_spending(journeys)
+    typer.echo(f"Journeys in {chosen_month}: {len(journeys)}\nTotal spending: {spent:.2f} €")
+
+    if budget is not None:
+        left = remaining_budget(spent, budget)
+        if left < 0:
+            typer.echo(f"You are {-left:.2f} € over your budget of {budget:.2f} €")
+        else:
+            typer.echo(f"You have {left:.2f} € left of your budget of {budget:.2f} €")
