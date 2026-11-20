@@ -63,18 +63,15 @@ def get_config(path: Path | None) -> FareConfig:
     try:
         return load_fare_config(path)
     except (OSError, ValueError) as error:
-        typer.echo(f"Error: {error}", err=True)
-        raise typer.Exit(code=1) from None
+        stop_with_error(str(error))
 
 
 def check_passenger_type(passenger: str, config: FareConfig) -> None:
     """Stop with an error if the passenger type is not valid."""
     if not is_valid_passenger_type(passenger, config):
-        typer.echo(
-            f"Error: unknown passenger type '{passenger}'. Options: adult, child, student, senior.",
-            err=True,
+        stop_with_error(
+            f"unknown passenger type '{passenger}'. Options: adult, child, student, senior."
         )
-        raise typer.Exit(code=1)
 
 
 def get_journey_zones(origin: str, destination: str) -> tuple[int, int]:
@@ -84,12 +81,9 @@ def get_journey_zones(origin: str, destination: str) -> tuple[int, int]:
         destination_zone = get_station_zone(destination)
     except KeyError as error:
         unknown_station = str(error.args[0])
-        typer.echo(
-            f"Error: unknown station '{unknown_station}'. "
-            "Use 'fares stations' to see valid stations.",
-            err=True,
+        stop_with_error(
+            f"unknown station '{unknown_station}'. Use 'fares stations' to see valid stations."
         )
-        raise typer.Exit(code=1) from None
 
     return origin_zone, destination_zone
 
@@ -120,11 +114,7 @@ def calculate(
     check_passenger_type(passenger, config)
 
     if not is_valid_ticket_type(ticket):
-        typer.echo(
-            f"Error: Invalid ticket type '{ticket}'. Options: single, 10-trip, monthly.",
-            err=True,
-        )
-        raise typer.Exit(code=1)
+        stop_with_error(f"Invalid ticket type '{ticket}'. Options: single, 10-trip, monthly.")
 
     origin_zone, destination_zone = get_journey_zones(origin, destination)
 
@@ -176,11 +166,7 @@ def recommend(
     check_passenger_type(passenger, config)
 
     if journeys <= 0:
-        typer.echo(
-            "Error: number of journeys must be greater than zero.",
-            err=True,
-        )
-        raise typer.Exit(code=1)
+        stop_with_error("number of journeys must be greater than zero.")
 
     origin_zone, destination_zone = get_journey_zones(origin, destination)
 
