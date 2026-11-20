@@ -28,7 +28,7 @@ from public_transport_fares.journeys import (
     save_journeys,
     total_spending,
 )
-from public_transport_fares.stations import get_station_zone, list_stations
+from public_transport_fares.stations import find_station, get_station_zone, list_stations
 
 app = typer.Typer(help="Calculate public transport fares between stations.")
 
@@ -225,6 +225,8 @@ def save(
     config = get_config(fares)
     check_passenger_type(passenger, config)
     origin_zone, destination_zone = get_journey_zones(origin, destination)
+    origin = find_station(origin).name
+    destination = find_station(destination).name
 
     try:
         journey_day = parse_day(day) if day else date.today().isoformat()
