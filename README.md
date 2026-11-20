@@ -138,7 +138,8 @@ The application compares the total cost of single tickets, 10-trip tickets, and 
 | `10-trip` | Price of the 10-trip passes needed to cover all journeys |
 | `monthly` | Fixed monthly price based on the number of fare zones |
 
-Examples
+**Examples**
+
 Recommend a ticket for 5 journeys within one fare zone:
 ```bash
 uv run fares recommend "Catalunya" "Sagrada Familia" --journeys 5
@@ -488,6 +489,9 @@ public-transport-fares/
 ├── .github/workflows/check.yml
 ├── Dockerfile
 ├── .dockerignore
+├── .pre-commit-config.yaml
+├── LICENSE
+├── PULL_REQUEST_TEMPLATE.md
 ├── my-fares.json
 ├── pyproject.toml
 └── uv.lock
