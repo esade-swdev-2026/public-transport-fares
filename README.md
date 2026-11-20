@@ -308,11 +308,14 @@ The application exits with a non-zero exit code and does not display a Python tr
 
 ### Run the published image
 
-After the `v1.0` image is published, download it from GitHub Container Registry:
+Our CI pipeline publishes the image to GitHub Container Registry on every merge to `main` and on the `v1.0` tag. The package is private, so log in first with a GitHub token that has `read:packages`, then download it:
 
 ```bash
+docker login ghcr.io -u <your-github-username>
 docker pull ghcr.io/esade-swdev-2026/public-transport-fares:v1.0
 ```
+
+The image is built for `linux/amd64`. On a Mac with an Apple chip, add `--platform linux/amd64` to `docker pull` and `docker run`.
 
 Calculate a fare:
 
@@ -327,31 +330,31 @@ Expected fare: 4.50 €.
 
 Build the Docker image:
 
-```bash id="l1jtc8"
+```bash
 docker build -t fares .
 ```
 
 Display command-line help:
 
-```bash id="k08ft1"
+```bash
 docker run --rm fares --help
 ```
 
 Calculate a fare:
 
-```bash id="jh67c8"
+```bash
 docker run --rm fares calculate "Catalunya" "Terrassa" --time 12:00
 ```
 
 Recommend a ticket:
 
-```bash id="zbk2zn"
+```bash
 docker run --rm fares recommend "Catalunya" "Terrassa" --journeys 5
 ```
 
 Verify that the container runs as a non-root user:
 
-```bash id="3u121m"
+```bash
 docker run --rm --entrypoint id fares
 ```
 
@@ -439,27 +442,43 @@ public-transport-fares/
 │   └── public_transport_fares/
 │       ├── __main__.py
 │       ├── cli.py
+│       ├── config.py
+│       ├── fares.json
 │       ├── fares.py
+│       ├── journeys.py
 │       └── stations.py
 ├── tests/
+│   ├── conftest.py
 │   ├── test_cli.py
+│   ├── test_config.py
 │   ├── test_fares.py
+│   ├── test_journeys.py
 │   └── test_stations.py
 ├── scripts/
 │   └── check.sh
+├── .github/workflows/check.yml
+├── Dockerfile
+├── .dockerignore
+├── my-fares.json
 ├── pyproject.toml
 └── uv.lock
 ```
 
-- `cli.py`: command-line interface built with Typer.
-- `fares.py`: fare calculations, ticket prices, and passenger discounts.
+- `cli.py`: command-line interface built with Typer: reads input, prints results.
+- `config.py`: loads and validates fare prices and passenger discounts from JSON.
+- `fares.json`: the default fare prices and passenger discounts.
+- `fares.py`: fare calculations, ticket prices, peak-time surcharge, and ticket recommendations.
+- `journeys.py`: saved journeys, free transfers, and monthly spending.
 - `stations.py`: station information and fare zones.
 - `tests/`: automated tests.
 - `scripts/check.sh`: runs the project quality checks.
+- `.github/workflows/check.yml`: CI that runs the checks, builds the image, and publishes it to GHCR.
+- `Dockerfile`, `.dockerignore`: how the container image is built.
+- `my-fares.json`: an example of custom fares, used in *Custom fares with Docker*.
 
 ### Current Assumptions and Limitations
 
-The initial version of Public Transport Fares uses a simplified simulation of Barcelona's fare system.
+Public Transport Fares uses a simplified simulation of Barcelona's fare system.
 
 - The default passenger is an adult. Child, student and senior passengers receive a fixed percentage discount on the adult fare.
 - Three ticket types are supported: single, 10-trip, and monthly.
@@ -476,7 +495,7 @@ The initial version of Public Transport Fares uses a simplified simulation of Ba
 - The application does not access live transport information.
 - The application runs exclusively through the command line.
 
-These assumptions are intentional simplifications for the first version. Additional functionality will be introduced incrementally through the Product Backlog.
+These assumptions are intentional simplifications for an academic project.
 
 ## Use of AI Tools
 
