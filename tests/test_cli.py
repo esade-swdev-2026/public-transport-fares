@@ -631,3 +631,13 @@ def test_spending_rejects_a_budget_that_is_not_positive(tmp_path: Path, budget: 
 
     assert result.exit_code == 1
     assert "budget must be greater than zero" in result.stderr
+
+
+def test_save_stores_station_names_as_listed(tmp_path: Path) -> None:
+    journal = tmp_path / "journeys.json"
+
+    runner.invoke(app, ["save", " catalunya ", "TERRASSA", "--journal", str(journal)])
+
+    saved = json.loads(journal.read_text(encoding="utf-8"))
+    assert saved[0]["origin"] == "Catalunya"
+    assert saved[0]["destination"] == "Terrassa"
