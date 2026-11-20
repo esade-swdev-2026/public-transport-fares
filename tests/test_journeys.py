@@ -16,6 +16,7 @@ from public_transport_fares.journeys import (
     parse_time,
     remaining_budget,
     save_journeys,
+    spending_by_route,
     total_spending,
 )
 
@@ -179,3 +180,16 @@ def test_remaining_budget_is_negative_over_budget() -> None:
 
 def test_remaining_budget_is_zero_exactly_at_budget() -> None:
     assert remaining_budget(spent=50, budget=50) == 0
+
+
+def test_spending_by_route_groups_journeys_with_the_same_route() -> None:
+    routes = spending_by_route([NOVEMBER_TRIP, NOVEMBER_RETURN, NOVEMBER_TRIP])
+
+    assert [(r.origin, r.destination, r.journey_count, r.total) for r in routes] == [
+        ("Catalunya", "Terrassa", 2, 9.00),
+        ("Terrassa", "Catalunya", 1, 4.50),
+    ]
+
+
+def test_spending_by_route_of_no_journeys_is_empty() -> None:
+    assert spending_by_route([]) == []

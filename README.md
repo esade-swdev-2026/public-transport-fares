@@ -246,6 +246,20 @@ You are 6.20 € over your budget of 50.00 €
 
 The budget must be greater than zero. Zero or negative values display an error message and exit with a non-zero status code.
 
+Add `--by-route` to see how much you spent on each route:
+
+```bash
+uv run fares spending --month 2026-11 --by-route
+```
+
+```text
+By route:
+  Catalunya -> Terrassa: 2 journeys, 9.90 €
+  Terrassa -> Catalunya: 1 journey, 5.40 €
+```
+
+Routes are listed in the order they first appear in the month.
+
 
 ### Peak-Time Surcharge
 

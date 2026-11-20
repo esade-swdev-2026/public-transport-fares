@@ -641,3 +641,15 @@ def test_save_stores_station_names_as_listed(tmp_path: Path) -> None:
     saved = json.loads(journal.read_text(encoding="utf-8"))
     assert saved[0]["origin"] == "Catalunya"
     assert saved[0]["destination"] == "Terrassa"
+
+
+def test_spending_by_route_adds_up_each_route(tmp_path: Path) -> None:
+    journal = tmp_path / "journeys.json"
+    save_two_journeys(journal)
+
+    result = runner.invoke(
+        app, ["spending", "--month", "2026-11", "--by-route", "--journal", str(journal)]
+    )
+
+    assert result.exit_code == 0
+    assert "Catalunya -> Terrassa: 2 journeys, 9.00 €" in result.stdout

@@ -26,6 +26,7 @@ from public_transport_fares.journeys import (
     parse_time,
     remaining_budget,
     save_journeys,
+    spending_by_route,
     total_spending,
 )
 from public_transport_fares.stations import find_station, get_station_zone, list_stations
@@ -274,6 +275,10 @@ def spending(
         float | None,
         typer.Option(help="Monthly budget in euros. Tells you if you went over it."),
     ] = None,
+    by_route: Annotated[
+        bool,
+        typer.Option("--by-route", help="Also show how much you spent on each route."),
+    ] = False,
 ) -> None:
     """List your saved journeys for a month and their total cost."""
     try:
@@ -290,6 +295,15 @@ def spending(
         typer.echo(
             f"{journey.day}  {journey.origin} -> {journey.destination}  {journey.price:.2f} €"
         )
+
+    if by_route:
+        typer.echo("By route:")
+        for route in spending_by_route(journeys):
+            word = "journey" if route.journey_count == 1 else "journeys"
+            typer.echo(
+                f"  {route.origin} -> {route.destination}: "
+                f"{route.journey_count} {word}, {route.total:.2f} €"
+            )
 
     spent = total_spending(journeys)
     typer.echo(f"Journeys in {chosen_month}: {len(journeys)}\nTotal spending: {spent:.2f} €")
