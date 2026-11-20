@@ -13,6 +13,14 @@ class Journey:
     start_time: str | None = None
 
 
+@dataclass(frozen=True)
+class RouteSpending:
+    origin: str
+    destination: str
+    journey_count: int
+    total: float
+
+
 TRANSFER_WINDOW_MINUTES = 75
 
 
@@ -87,6 +95,19 @@ def total_spending(journeys: list[Journey]) -> float:
 def remaining_budget(spent: float, budget: float) -> float:
     """Return how much of the budget is left; a negative result means overspending."""
     return round(budget - spent, 2)
+
+
+def spending_by_route(journeys: list[Journey]) -> list[RouteSpending]:
+    """Group journeys by origin and destination, in the order each route first appears."""
+    prices_by_route: dict[tuple[str, str], list[float]] = {}
+    for journey in journeys:
+        route = (journey.origin, journey.destination)
+        prices_by_route.setdefault(route, []).append(journey.price)
+
+    return [
+        RouteSpending(origin, destination, len(prices), round(sum(prices), 2))
+        for (origin, destination), prices in prices_by_route.items()
+    ]
 
 
 def load_journeys(path: Path) -> list[Journey]:
