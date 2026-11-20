@@ -64,13 +64,19 @@ def is_valid_passenger_type(
     return passenger in config.passenger_discounts
 
 
+def passenger_types(config: FareConfig) -> list[str]:
+    """Return the passenger types the fare configuration defines, in file order."""
+    return list(config.passenger_discounts)
+
+
 def apply_passenger_discount(
     price: float,
     passenger: str,
     config: FareConfig,
 ) -> float:
     if not is_valid_passenger_type(passenger, config):
-        raise ValueError("Invalid passenger type. Options: adult, child, student, senior.")
+        options = ", ".join(passenger_types(config))
+        raise ValueError(f"Invalid passenger type. Options: {options}.")
 
     return price * (1 - config.passenger_discounts[passenger])
 

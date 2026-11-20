@@ -584,3 +584,10 @@ def test_every_error_is_one_clear_line_on_stderr(args: list[str]) -> None:
     assert result.stderr.startswith("Error: ")
     assert result.stdout == ""
     assert "Traceback" not in result.output
+
+
+def test_unknown_passenger_error_lists_the_valid_types() -> None:
+    result = runner.invoke(app, ["calculate", "Catalunya", "Terrassa", "--passenger", "dog"])
+
+    assert result.exit_code == 1
+    assert "Options: adult, child, student, senior." in result.stderr

@@ -13,6 +13,7 @@ from public_transport_fares.fares import (
     calculate_ticket_price,
     is_valid_passenger_type,
     is_valid_ticket_type,
+    passenger_types,
     recommend_ticket,
 )
 from public_transport_fares.journeys import (
@@ -69,9 +70,8 @@ def get_config(path: Path | None) -> FareConfig:
 def check_passenger_type(passenger: str, config: FareConfig) -> None:
     """Stop with an error if the passenger type is not valid."""
     if not is_valid_passenger_type(passenger, config):
-        stop_with_error(
-            f"unknown passenger type '{passenger}'. Options: adult, child, student, senior."
-        )
+        options = ", ".join(passenger_types(config))
+        stop_with_error(f"unknown passenger type '{passenger}'. Options: {options}.")
 
 
 def get_journey_zones(origin: str, destination: str) -> tuple[int, int]:

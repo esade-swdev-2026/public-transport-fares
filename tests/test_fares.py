@@ -12,6 +12,7 @@ from public_transport_fares.fares import (
     calculate_ticket_price,
     is_peak_time,
     is_valid_passenger_type,
+    passenger_types,
     price_for_zones,
     recommend_ticket,
 )
@@ -312,3 +313,14 @@ def test_no_peak_surcharge_off_peak() -> None:
 @pytest.mark.parametrize("ticket_type", ["10-trip", "monthly"])
 def test_no_peak_surcharge_on_passes(ticket_type: str) -> None:
     assert apply_peak_surcharge(36.00, ticket_type, time(8, 15)) == 36.00
+
+
+def test_passenger_types_come_from_the_configuration(default_config: FareConfig) -> None:
+    assert passenger_types(default_config) == ["adult", "child", "student", "senior"]
+
+
+def test_invalid_passenger_error_lists_the_configured_types() -> None:
+    config = FareConfig(fare_prices={1: 2.0}, passenger_discounts={"adult": 0.0, "pensioner": 0.5})
+
+    with pytest.raises(ValueError, match="Options: adult, pensioner."):
+        apply_passenger_discount(2.0, "dog", config)
