@@ -94,8 +94,14 @@ def get_journey_zones(origin: str, destination: str) -> tuple[int, int]:
 def calculate(
     origin: str,
     destination: str,
-    passenger: str = "adult",
-    ticket: str = "single",
+    passenger: Annotated[
+        str,
+        typer.Option(help="Passenger type: adult, child, student or senior."),
+    ] = "adult",
+    ticket: Annotated[
+        str,
+        typer.Option(help="Ticket type: single, 10-trip or monthly."),
+    ] = "single",
     journey_time: Annotated[
         str | None,
         typer.Option(
