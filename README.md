@@ -231,6 +231,21 @@ uv run fares spending --month 2026-11
 
 Use `--journal PATH` (or the `FARES_JOURNAL` environment variable) to keep the journeys in another file.
 
+Add `--budget` to compare your spending with a monthly budget in euros:
+
+```bash
+uv run fares spending --month 2026-11 --budget 50
+```
+
+The last line of the output tells you how much of the budget is left, or how much you went over it:
+
+```text
+Total spending: 56.20 €
+You are 6.20 € over your budget of 50.00 €
+```
+
+The budget must be greater than zero. Zero or negative values display an error message and exit with a non-zero status code.
+
 
 ### Peak-Time Surcharge
 

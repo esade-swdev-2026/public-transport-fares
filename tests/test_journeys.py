@@ -14,6 +14,7 @@ from public_transport_fares.journeys import (
     parse_day,
     parse_month,
     parse_time,
+    remaining_budget,
     save_journeys,
     total_spending,
 )
@@ -166,3 +167,15 @@ def test_no_free_transfer_without_previous_journey_or_time() -> None:
 
     assert not is_free_transfer(None, next_leg)
     assert not is_free_transfer(old_journey, next_leg)
+
+
+def test_remaining_budget_is_positive_under_budget() -> None:
+    assert remaining_budget(spent=43.80, budget=50) == 6.20
+
+
+def test_remaining_budget_is_negative_over_budget() -> None:
+    assert remaining_budget(spent=56.20, budget=50) == -6.20
+
+
+def test_remaining_budget_is_zero_exactly_at_budget() -> None:
+    assert remaining_budget(spent=50, budget=50) == 0

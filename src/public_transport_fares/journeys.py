@@ -84,6 +84,11 @@ def total_spending(journeys: list[Journey]) -> float:
     return round(sum(journey.price for journey in journeys), 2)
 
 
+def remaining_budget(spent: float, budget: float) -> float:
+    """Return how much of the budget is left; a negative result means overspending."""
+    return round(budget - spent, 2)
+
+
 def load_journeys(path: Path) -> list[Journey]:
     """Read saved journeys from a file; a missing file means no journeys yet."""
     if not path.exists():

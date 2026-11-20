@@ -591,3 +591,43 @@ def test_unknown_passenger_error_lists_the_valid_types() -> None:
 
     assert result.exit_code == 1
     assert "Options: adult, child, student, senior." in result.stderr
+
+
+def save_two_journeys(journal: Path) -> None:
+    for origin, destination in [("Catalunya", "Terrassa"), ("Catalunya", "Terrassa")]:
+        runner.invoke(
+            app, ["save", origin, destination, "--date", "2026-11-03", "--journal", str(journal)]
+        )
+
+
+def test_spending_warns_when_over_budget(tmp_path: Path) -> None:
+    journal = tmp_path / "journeys.json"
+    save_two_journeys(journal)
+
+    result = runner.invoke(
+        app, ["spending", "--month", "2026-11", "--budget", "5", "--journal", str(journal)]
+    )
+
+    assert result.exit_code == 0
+    assert "You are 4.00 € over your budget of 5.00 €" in result.stdout
+
+
+def test_spending_shows_what_is_left_of_the_budget(tmp_path: Path) -> None:
+    journal = tmp_path / "journeys.json"
+    save_two_journeys(journal)
+
+    result = runner.invoke(
+        app, ["spending", "--month", "2026-11", "--budget", "20", "--journal", str(journal)]
+    )
+
+    assert "You have 11.00 € left of your budget of 20.00 €" in result.stdout
+
+
+@pytest.mark.parametrize("budget", ["0", "-10"])
+def test_spending_rejects_a_budget_that_is_not_positive(tmp_path: Path, budget: str) -> None:
+    result = runner.invoke(
+        app, ["spending", "--budget", budget, "--journal", str(tmp_path / "journeys.json")]
+    )
+
+    assert result.exit_code == 1
+    assert "budget must be greater than zero" in result.stderr
