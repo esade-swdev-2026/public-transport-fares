@@ -17,6 +17,15 @@ The project uses Python 3.13, matching the version used in GitHub Actions. The `
 ```bash
 git clone https://github.com/esade-swdev-2026/public-transport-fares.git
 cd public-transport-fares
+```
+
+### Install the dependencies
+
+```bash
+uv sync
+```
+
+This creates a virtual environment with Python 3.13 and installs the dependencies specified in `pyproject.toml`, using the exact versions recorded in `uv.lock`.
 
 ## Run
 
@@ -496,6 +505,7 @@ public-transport-fares/
 ├── .github/workflows/check.yml
 ├── Dockerfile
 ├── .dockerignore
+├── .python-version
 ├── .pre-commit-config.yaml
 ├── LICENSE
 ├── PULL_REQUEST_TEMPLATE.md
