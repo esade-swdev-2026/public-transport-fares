@@ -245,8 +245,8 @@ Total spending: 56.20 €
 You are 6.20 € over your budget of 50.00 €
 ```
 
-The budget must be greater than zero. Zero or negative values display an error message and exit with a non-zero status code.
-
+The budget must be a number greater than zero. Zero, negative values, `nan` and `inf` display an error message and exit with a non-zero status code.
+d
 Add `--by-route` to see how much you spent on each route:
 
 ```bash
@@ -260,6 +260,8 @@ By route:
 ```
 
 Routes are listed in the order they first appear in the month.
+
+The amounts in these two examples are illustrative: they depend on the journeys you have saved.
 
 
 ### Peak-Time Surcharge
