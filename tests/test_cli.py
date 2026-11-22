@@ -623,7 +623,7 @@ def test_spending_shows_what_is_left_of_the_budget(tmp_path: Path) -> None:
     assert "You have 11.00 € left of your budget of 20.00 €" in result.stdout
 
 
-@pytest.mark.parametrize("budget", ["0", "-10"])
+@pytest.mark.parametrize("budget", ["0", "-10", "nan", "inf"])
 def test_spending_rejects_a_budget_that_is_not_positive(tmp_path: Path, budget: str) -> None:
     result = runner.invoke(
         app, ["spending", "--budget", budget, "--journal", str(tmp_path / "journeys.json")]

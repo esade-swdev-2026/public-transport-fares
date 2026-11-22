@@ -1,3 +1,4 @@
+import math
 from dataclasses import replace
 from datetime import date, datetime, time
 from pathlib import Path
@@ -292,7 +293,7 @@ def spending(
     except ValueError as error:
         stop_with_error(str(error))
 
-    if budget is not None and budget <= 0:
+    if budget is not None and not (math.isfinite(budget) and budget > 0):
         stop_with_error("budget must be greater than zero.")
 
     journeys = journeys_in_month(get_journeys(journal), chosen_month)
