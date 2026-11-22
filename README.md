@@ -6,13 +6,17 @@ The project is designed to provide clear fare information based on the journey a
 
 ## Install
 
-Install the project and its dependencies with:
+### Prerequisites
+
+Install Git and [uv](https://docs.astral.sh/uv/getting-started/installation/) before starting.
+
+The project uses Python 3.13, matching the version used in GitHub Actions. The `.python-version` file tells `uv` which Python version to use.
+
+### Clone the repository
 
 ```bash
-uv sync
-```
-
-This creates a virtual environment and installs the dependencies specified in `pyproject.toml` using the exact versions recorded in `uv.lock`.
+git clone https://github.com/esade-swdev-2026/public-transport-fares.git
+cd public-transport-fares
 
 ## Run
 
