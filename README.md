@@ -70,7 +70,7 @@ Each passenger type pays a percentage of the adult fare:
 | `student` | 20% |
 | `senior` | 40% |
 
-For example, a child travelling from Catalunya to Terrassa (three zones) pays half of €4.50:
+For example, a child travelling from Catalunya to Terrassa (three zones) pays half of 4.50 €:
 
 ```text
 Fare from Catalunya to Terrassa for passenger type child and ticket type single: 2.25 €
@@ -83,7 +83,7 @@ An unknown passenger type, such as `--passenger dog`, prints an error and exits 
 Passengers can choose between three ticket types using the `--ticket` option:
 
 | Ticket type | Description |
-|---|---|
+| --- | --- |
 | `single` | One journey (default option) |
 | `10-trip` | Ten journeys with a 20% discount |
 | `monthly` | Monthly pass for the selected fare zones |
@@ -91,10 +91,10 @@ Passengers can choose between three ticket types using the `--ticket` option:
 The application uses simulated prices based on the number of fare zones:
 
 | Zones | Single | 10-trip | Monthly |
-|---|---|---|---|
-| 1 | €2.50 | €20.00 | €40.00 |
-| 2 | €3.50 | €28.00 | €56.00 |
-| 3 | €4.50 | €36.00 | €72.00 |
+| --- | --- | --- | --- |
+| 1 | 2.50 € | 20.00 € | 40.00 € |
+| 2 | 3.50 € | 28.00 € | 56.00 € |
+| 3 | 4.50 € | 36.00 € | 72.00 € |
 
 **Examples**
 
@@ -104,7 +104,7 @@ Calculate the price of a 10-trip ticket:
 uv run fares calculate "Catalunya" "Terrassa" --ticket 10-trip
 ```
 
-Expected price: €36.00.
+Expected fare: 36.00 €.
 
 Calculate the price of a monthly ticket:
 
@@ -112,7 +112,7 @@ Calculate the price of a monthly ticket:
 uv run fares calculate "Catalunya" "Terrassa" --ticket monthly
 ```
 
-Expected price: €72.00.
+Expected fare: 72.00 €.
 
 Apply a student discount to a 10-trip ticket:
 
@@ -120,20 +120,20 @@ Apply a student discount to a 10-trip ticket:
 uv run fares calculate "Catalunya" "Terrassa" --ticket 10-trip --passenger student
 ```
 
-Expected price: €28.80.
+Expected fare: 28.80 €.
 
 If `--ticket` is omitted, the application calculates a single ticket by default.
 
-Invalid ticket types display an error message and exit with a non-zero status code. The prices and discounts are simulated for this academic project and do not represent official public transport fares.
+Invalid ticket types display an error message and exit with a non-zero exit code. The prices and discounts are simulated for this academic project and do not represent official public transport fares.
 
 ### Ticket Recommendation
 
-Passengers can use the recommend command to find the cheapest ticket type based on the number of journeys they expect to make in a month.
+Passengers can use the `recommend` command to find the cheapest ticket type based on the number of journeys they expect to make in a month.
 
 The application compares the total cost of single tickets, 10-trip tickets, and monthly tickets using the existing simulated fare prices.
 
 | Ticket type | Calculation |
-|---|---|
+| --- | --- |
 | `single` | Total price of single tickets, including a 20% surcharge for journeys at peak times |
 | `10-trip` | Price of the 10-trip passes needed to cover all journeys |
 | `monthly` | Fixed monthly price based on the number of fare zones |
@@ -141,11 +141,13 @@ The application compares the total cost of single tickets, 10-trip tickets, and 
 **Examples**
 
 Recommend a ticket for 5 journeys within one fare zone:
+
 ```bash
 uv run fares recommend "Catalunya" "Sagrada Familia" --journeys 5
 ```
 
-Expected output:
+Output:
+
 ```text
 Recommended ticket: single
 Passenger type: adult
@@ -154,11 +156,13 @@ Total cost: 12.50 €
 ```
 
 Recommend a ticket for 10 journeys between two fare zones:
+
 ```bash
 uv run fares recommend "Catalunya" "Sant Cugat" --journeys 10
 ```
 
-Expected output:
+Output:
+
 ```text
 Recommended ticket: 10-trip
 Passenger type: adult
@@ -167,11 +171,13 @@ Total cost: 28.00 €
 ```
 
 Recommend a ticket for 30 journeys between three fare zones:
+
 ```bash
 uv run fares recommend "Catalunya" "Terrassa" --journeys 30
 ```
 
-Expected output:
+Output:
+
 ```text
 Recommended ticket: monthly
 Passenger type: adult
@@ -179,14 +185,16 @@ Journeys per month: 30
 Total cost: 72.00 €
 ```
 
-The number of journeys must be a positive integer. Zero or negative values display an error message and exit with a non-zero status code.
+The number of journeys must be a positive integer. Zero or negative values display an error message and exit with a non-zero exit code.
 
 Recommend a ticket for a student making 30 journeys between three fare zones:
+
 ```bash
 uv run fares recommend "Catalunya" "Terrassa" --journeys 30 --passenger student
 ```
 
-Expected output:
+Output:
+
 ```text
 Recommended ticket: monthly
 Passenger type: student
@@ -194,18 +202,20 @@ Journeys per month: 30
 Total cost: 57.60 €
 ```
 
-If `--passenger` is omitted, the recommendation uses adult fares. Unknown passenger types and unknown station names are handled in the same way as in the calculate command.
+If `--passenger` is omitted, the recommendation uses adult fares. Unknown passenger types and unknown station names are handled in the same way as in the `calculate` command.
 
 The passenger discount is applied to the total cost of the recommended ticket. The recommendation compares the cost of using each ticket type for all journeys. If two options have the same cost, the application selects the first one in the order: single, 10-trip, monthly.
 
-Use `--peak-journeys` to specify how many of your monthly journeys will be at peak times. The value must be an integer between 0 and the total number of journeys. If `--peak-journeys` is omitted, it defaults to 0. Values outside that range display an error message and exit with a non-zero status code.
+Use `--peak-journeys` to specify how many of your monthly journeys will be at peak times. The value must be an integer between 0 and the total number of journeys. If `--peak-journeys` is omitted, it defaults to 0. Values outside that range display an error message and exit with a non-zero exit code.
 
 Recommend a ticket for 7 peak-time journeys within one fare zone:
+
 ```bash
 uv run fares recommend "Catalunya" "Sagrada Familia" --journeys 7 --peak-journeys 7
 ```
 
-Expected output:
+Output:
+
 ```text
 Recommended ticket: 10-trip
 Passenger type: adult
@@ -213,7 +223,7 @@ Journeys per month: 7
 Total cost: 20.00 €
 ```
 
-Seven single tickets at peak times would cost €21.00.
+Seven single tickets at peak times would cost 21.00 €.
 
 ### Track Your Monthly Spending
 
@@ -245,8 +255,8 @@ Total spending: 56.20 €
 You are 6.20 € over your budget of 50.00 €
 ```
 
-The budget must be a number greater than zero. Zero, negative values, `nan` and `inf` display an error message and exit with a non-zero status code.
-d
+The budget must be a number greater than zero. Zero, negative values, `nan` and `inf` display an error message and exit with a non-zero exit code.
+
 Add `--by-route` to see how much you spent on each route:
 
 ```bash
@@ -262,7 +272,6 @@ By route:
 Routes are listed in the order they first appear in the month.
 
 The amounts in these two examples are illustrative: they depend on the journeys you have saved.
-
 
 ### Peak-Time Surcharge
 
@@ -287,7 +296,6 @@ Fare from Catalunya to Terrassa for passenger type adult and ticket type single:
 
 The surcharge is applied before the passenger discount, so a child at 08:15 pays 2.70 €. An invalid time, such as `--time 25:99`, prints an error and exits with a non-zero exit code.
 
-
 ### Free Transfers
 
 When you save a journey with `save`, it is free (0.00 €) if it continues your last saved journey:
@@ -311,9 +319,7 @@ Saved 2026-11-17: Catalunya -> Sant Cugat, 3.50 €
 Saved 2026-11-17: Sant Cugat -> Terrassa, 0.00 € (free transfer)
 ```
 
-Each saved journey now records its start time. Journeys saved before this change have no start time and are never counted as transfers.
-
-
+Each saved journey records its start time. Journeys saved before this change have no start time and are never counted as transfers.
 
 ### Unknown Station Errors
 
@@ -335,17 +341,18 @@ Error: unknown station 'madrid'. Use 'fares stations' to see valid stations.
 
 The application exits with a non-zero exit code and does not display a Python traceback.
 
-
 ## Run with Docker
 
-### Run the published image
+### Run the Published Image
 
 Our CI pipeline publishes the image to GitHub Container Registry on every merge to `main` and on the `v1.0` tag. The package is private, so log in first with a GitHub token that has `read:packages`, then download it:
 
 ```bash
-docker login ghcr.io -u <your-github-username>
+docker login ghcr.io -u YOUR_GITHUB_USERNAME
 docker pull ghcr.io/esade-swdev-2026/public-transport-fares:v1.0
 ```
+
+Replace `YOUR_GITHUB_USERNAME` with your GitHub username, in lowercase.
 
 The image is built for `linux/amd64`. On a Mac with an Apple chip, add `--platform linux/amd64` to `docker pull` and `docker run`.
 
@@ -358,7 +365,7 @@ docker run --rm ghcr.io/esade-swdev-2026/public-transport-fares:v1.0 \
 
 Expected fare: 4.50 €.
 
-### Build the image locally
+### Build the Image Locally
 
 Build the Docker image:
 
@@ -390,7 +397,7 @@ Verify that the container runs as a non-root user:
 docker run --rm --entrypoint id fares
 ```
 
-### Saved journeys with Docker
+### Saved Journeys with Docker
 
 Journeys are saved in `/data` inside the container. Mount a named volume there, and they survive `docker rm`:
 
@@ -402,11 +409,9 @@ docker run --rm -v fares-journeys:/data fares spending --month 2026-11
 
 Each container is removed after it runs, but the last command still shows `Total spending: 9.00 €`.
 
+### Custom Fares with Docker
 
-### Custom fares with Docker
-
-Fare prices and passenger discounts can be loaded from an external JSON
-file using a read-only bind mount.
+Fare prices and passenger discounts can be loaded from an external JSON file using a read-only bind mount.
 
 Build the image:
 
@@ -433,15 +438,11 @@ docker run --rm \
 
 Expected fare: 5.00 €.
 
-To verify that the external configuration works without rebuilding
-the image, change the zone 3 price in `my-fares.json` from 5.00 to 6.00
-and run the same Docker command again.
+To verify that the external configuration works without rebuilding the image, change the zone 3 price in `my-fares.json` from 5.00 to 6.00 and run the same Docker command again.
 
 The result changes to 6.00 € without running `docker build` again.
 
-The configuration remains on the host computer and is mounted
-read-only inside the container.
-
+The configuration remains on the host computer and is mounted read-only inside the container.
 
 ## Develop
 
@@ -509,7 +510,7 @@ public-transport-fares/
 - `scripts/check.sh`: runs the project quality checks.
 - `.github/workflows/check.yml`: CI that runs the checks, builds the image, and publishes it to GHCR.
 - `Dockerfile`, `.dockerignore`: how the container image is built.
-- `my-fares.json`: an example of custom fares, used in *Custom fares with Docker*.
+- `my-fares.json`: an example of custom fares, used in *Custom Fares with Docker*.
 
 ### Current Assumptions and Limitations
 
@@ -521,7 +522,7 @@ Public Transport Fares uses a simplified simulation of Barcelona's fare system.
 - Ticket prices and passenger discounts are simulated and do not represent official Barcelona public transport fares.
 - The simulation is limited to metro travel, seven predefined stations, and three fare zones.
 - Each station belongs to exactly one zone.
-- Single-ticket prices are €2.50, €3.50, and €4.50 for one, two, and three zones respectively. The prices of 10-trip and monthly tickets are calculated from these base fares.
+- Single-ticket prices are 2.50 €, 3.50 €, and 4.50 € for one, two, and three zones respectively. The prices of 10-trip and monthly tickets are calculated from these base fares.
 - Fare zones are calculated using the absolute difference between zone numbers plus one.
 - Journeys within the same zone count as one zone, and fares are identical in both directions.
 - Fare calculations use zones. The application uses saved journeys to check for free transfers.
